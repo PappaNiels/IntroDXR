@@ -1,14 +1,29 @@
 #include "pch.hpp"
 #include "Device.hpp"
 
+#include "CommandQueue.hpp"
+
 #include <Utils/Error.hpp>
 #include <Utils/CLI.hpp>
 #include <Utils/Assert.hpp>
+
+Device* g_Device;
+
+Device& Device::GetDevice()
+{
+	ASSERT(g_Device != nullptr, "The d3d12 device was not initialized");
+	return *g_Device;
+}
 
 void Device::Initialize()
 {
 	CreateAdapter();
 	CreateDevice();
+
+	g_Device = this;
+
+	m_CommandQueue = std::unique_ptr<CommandQueue>(new CommandQueue());
+	m_CommandQueue->Initialize();
 }
 
 void Device::CreateAdapter()

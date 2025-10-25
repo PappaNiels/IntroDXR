@@ -18,6 +18,8 @@ public:
 
 private:
 	void CreateRenderWindow();
+	void CreateRenderTarget();
+	void CreateCommandLists();
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -25,12 +27,29 @@ private:
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 	class Device* m_Device;
-
-	ComPtr<IDXGISwapChain> m_SwapChain;
+	class SwapChain* m_SwapChain;
 
 	HWND m_HWND;
 
+	class DescriptorHeap* m_RTVHeap;
+	class DescriptorHeap* m_ShaderHeap;
+
+	ComPtr<ID3D12Resource> m_RenderTarget;
+	uint32_t m_RTV;
+	uint32_t m_UAV;
+
+	ComPtr<ID3D12RootSignature> m_RootSignature;
+	ComPtr<ID3D12PipelineState> m_PipelineState;
+	
+	ComPtr<ID3D12GraphicsCommandList7> m_CommandList[2];
+	ComPtr<ID3D12CommandAllocator> m_CommandListAllocator[2];
+
+	uint64_t m_FrameNumber = 0;
+
+	uint64_t m_FenceValue[2] = {};
+
 	uint32_t m_Width;
 	uint32_t m_Height;
+
 };
 

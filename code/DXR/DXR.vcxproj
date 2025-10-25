@@ -146,9 +146,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Renderer\Attributes\DescriptorHeap.cpp" />
+    <ClCompile Include="Renderer\Attributes\CommandQueue.cpp" />
     <ClCompile Include="Renderer\Attributes\Device.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
+    <ClCompile Include="Renderer\Attributes\SwapChain.cpp" />
     <ClCompile Include="Utils\Assert.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -158,8 +161,11 @@
     <ClCompile Include="Utils\Error.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Renderer\Attributes\DescriptorHeap.hpp" />
+    <ClInclude Include="Renderer\Attributes\CommandQueue.hpp" />
     <ClInclude Include="Renderer\Attributes\Device.hpp" />
     <ClInclude Include="Renderer\Renderer.hpp" />
+    <ClInclude Include="Renderer\Attributes\SwapChain.hpp" />
     <ClInclude Include="Utils\Assert.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Utils\CLI.hpp" />

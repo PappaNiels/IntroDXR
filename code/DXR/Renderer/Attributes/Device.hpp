@@ -2,13 +2,30 @@
 
 #include <wrl/client.h>
 
+#include <Renderer/Attributes/CommandQueue.hpp>
+
 class Device
 {
 public:
-	Device() = default;
+	static Device& GetDevice();
 
 	void Initialize();
+
+	Microsoft::WRL::ComPtr<ID3D12Device5> GetInternalDevice() const
+	{
+		return m_Device;
+	}
+
+	CommandQueue& GetCommandQueue()
+	{
+		return *m_CommandQueue;
+	}
+
+protected:
+	friend class Renderer;
+	Device() = default;
 private:
+
 	void CreateAdapter();
 	void CreateDevice();
 
@@ -18,6 +35,8 @@ private:
 
 	Microsoft::WRL::ComPtr<IDXGIAdapter> m_Adapter;
 	Microsoft::WRL::ComPtr<ID3D12Device5> m_Device;
+
+	std::unique_ptr<class CommandQueue> m_CommandQueue;
 
 	bool m_HasDebugLayersEnabled = false;
 };

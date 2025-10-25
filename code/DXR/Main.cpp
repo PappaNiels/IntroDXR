@@ -46,6 +46,8 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR cmdLine, INT cmdShow)
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+
+		renderer->Render();
 	}
 
 	if (GetCLI().Console)
