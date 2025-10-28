@@ -20,6 +20,8 @@ private:
 	void CreateRenderWindow();
 	void CreateRenderTarget();
 	void CreateCommandLists();
+	void CreateGeometry();
+	void CreateBVH();
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -31,16 +33,21 @@ private:
 
 	HWND m_HWND;
 
-	class DescriptorHeap* m_RTVHeap;
-	class DescriptorHeap* m_ShaderHeap;
+	class DescriptorHeap* m_RTVHeap = nullptr;
+	class DescriptorHeap* m_ShaderHeap = nullptr;
+
+	class RaytracingPipeline* m_Pipeline = nullptr;
 
 	ComPtr<ID3D12Resource> m_RenderTarget;
 	uint32_t m_RTV;
 	uint32_t m_UAV;
 
-	ComPtr<ID3D12RootSignature> m_RootSignature;
-	ComPtr<ID3D12PipelineState> m_PipelineState;
-	
+	ComPtr<ID3D12Resource> m_VertexBuffer;
+	ComPtr<ID3D12Resource> m_IndexBuffer;
+
+	ComPtr<ID3D12Resource> m_TLAS;
+	ComPtr<ID3D12Resource> m_BLAS;
+
 	ComPtr<ID3D12GraphicsCommandList7> m_CommandList[2];
 	ComPtr<ID3D12CommandAllocator> m_CommandListAllocator[2];
 

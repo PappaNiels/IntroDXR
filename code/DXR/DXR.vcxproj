@@ -47,12 +47,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\</OutDir>
     <TargetName>IntroDXR_$(Platform)_$(Configuration)</TargetName>
-    <MultiProcFXC>true</MultiProcFXC>
+    <MultiProcFXC>false</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\</OutDir>
     <TargetName>IntroDXR_$(Platform)_$(Configuration)</TargetName>
-    <MultiProcFXC>true</MultiProcFXC>
+    <MultiProcFXC>false</MultiProcFXC>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -62,7 +62,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\vendor\DirectXMath\Inc\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
@@ -89,7 +89,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\vendor\DirectXMath\Inc\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
@@ -106,6 +106,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Renderer\Attributes\RaytracingPipeline.cpp" />
     <ClCompile Include="Renderer\Attributes\DescriptorHeap.cpp" />
     <ClCompile Include="Renderer\Attributes\CommandQueue.cpp" />
     <ClCompile Include="Renderer\Attributes\Device.cpp" />
@@ -121,11 +122,13 @@
     <ClCompile Include="Utils\Error.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Renderer\Attributes\RaytracingPipeline.hpp" />
     <ClInclude Include="Renderer\Attributes\DescriptorHeap.hpp" />
     <ClInclude Include="Renderer\Attributes\CommandQueue.hpp" />
     <ClInclude Include="Renderer\Attributes\Device.hpp" />
     <ClInclude Include="Renderer\Renderer.hpp" />
     <ClInclude Include="Renderer\Attributes\SwapChain.hpp" />
+    <ClInclude Include="Renderer\Shaders\Shared.hpp" />
     <ClInclude Include="Utils\Assert.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Utils\CLI.hpp" />

@@ -15,6 +15,10 @@ public:
 	CD3DX12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(uint32_t index);
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(uint32_t index);
 
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetHeap() const
+	{
+		return m_Heap;
+	}
 protected:
 	friend class Renderer;
 	DescriptorHeap() = default;
