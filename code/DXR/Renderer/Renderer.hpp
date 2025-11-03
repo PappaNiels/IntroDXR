@@ -14,6 +14,10 @@ public:
 	void Shutdown();
 
 	void Render();
+
+	virtual void InitializeSample() {};
+	virtual void RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7>) {};
+
 	void Resize(uint32_t width, uint32_t height);
 
 private:
@@ -25,6 +29,7 @@ private:
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
+protected:
 	template<typename T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
 

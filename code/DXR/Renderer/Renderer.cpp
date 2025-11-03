@@ -57,7 +57,9 @@ void Renderer::Initialize()
 	CreateGeometry();
 	CreateBVH();
 
-	m_Pipeline = new RaytracingPipeline("name", nullptr);
+	//m_Pipeline = new RaytracingPipeline("name", nullptr);
+
+	InitializeSample();
 }
 
 void Renderer::Shutdown()

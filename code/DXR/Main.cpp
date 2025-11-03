@@ -3,6 +3,8 @@
 #include <Utils/CLI.hpp>
 #include <Renderer/Renderer.hpp>
 
+extern Renderer* CreateSample();
+
 void CreateConsole()
 {
 	if (GetCLI().Console == 0)
@@ -35,7 +37,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR cmdLine, INT cmdShow)
 
 	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
-	Renderer* renderer = new Renderer();
+	Renderer* renderer = CreateSample();
 	renderer->Initialize();
 
 	MSG msg = {};

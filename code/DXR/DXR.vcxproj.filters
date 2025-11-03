@@ -90,6 +90,5 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Renderer\Shaders\RaytracingBasic.hlsl" />
-    <FxCompile Include="Renderer\Shaders\RaytracingMesh.hlsl" />
   </ItemGroup>
 </Project>
