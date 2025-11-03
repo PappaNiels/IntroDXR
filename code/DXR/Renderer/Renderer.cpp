@@ -72,7 +72,7 @@ void Renderer::Render()
 
 	if (m_FrameNumber > 1)
 	{
-		commandQueue.WaitForFence(m_FenceValue[m_FrameNumber % 2]);
+		//commandQueue.WaitForFence(m_FenceValue[m_FrameNumber % 2]);
 
 		m_CommandListAllocator[m_FrameNumber % 2]->Reset();
 		cmdList->Reset(m_CommandListAllocator[m_FrameNumber % 2].Get(), nullptr);
@@ -104,9 +104,9 @@ void Renderer::Render()
 	cmdList->SetPipelineState1(m_Pipeline->GetStateObject().Get());
 	cmdList->DispatchRays(&dispatchDesc);
 
-	auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(m_RenderTarget.Get());
+	//auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(m_RenderTarget.Get());
 
-	m_FenceValue[m_FrameNumber % 2] = commandQueue.ExecuteCommandLists({ cmdList.Get() });
+	commandQueue.ExecuteCommandLists({ cmdList.Get() });
 
 	m_SwapChain->Present(m_RenderTarget);
 
@@ -219,6 +219,11 @@ void Renderer::CreateGeometry()
 		{
 			FatalError("Failed to create a vertex buffer. HResult: 0x%08X", hr);
 		}
+
+		void* data;
+		m_VertexBuffer->Map(0, nullptr, &data);
+		memcpy(data, positions, sizeof(positions));
+		m_VertexBuffer->Unmap(0, nullptr);
 	}
 
 	{
@@ -230,6 +235,11 @@ void Renderer::CreateGeometry()
 		{
 			FatalError("Failed to create a index buffer. HResult: 0x%08X", hr);
 		}
+
+		void* data;
+		m_IndexBuffer->Map(0, nullptr, &data);
+		memcpy(data, indices, sizeof(indices));
+		m_IndexBuffer->Unmap(0, nullptr);
 	}
 }
 
@@ -376,6 +386,13 @@ LRESULT Renderer::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CLOSE:
 		PostQuitMessage(0);
+		return 0;
+	case WM_KEYDOWN:
+		if (wParam == VK_ESCAPE)
+		{
+			PostQuitMessage(0);
+		}
+		break;
 	}
 
 	return DefWindowProc(hwnd, message, wParam, lParam);

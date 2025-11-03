@@ -7,5 +7,5 @@ void _Assert(bool expression, const std::string_view fmt, const std::string_view
 #if defined _DEBUG
 #define ASSERT(expression, fmt, ...) _Assert(expression, fmt, __FILE__, __LINE__ ##__VA_ARGS__)
 #else
-#define ASSERT(expression, fmt, ...)
+#define ASSERT(expression, fmt, ...) expression
 #endif

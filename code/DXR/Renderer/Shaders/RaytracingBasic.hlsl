@@ -9,6 +9,12 @@ struct RayPayload
     float4 color;
 };
 
+struct RayPayloadShadow
+{
+    bool IsOccluded;
+};
+
+
 cbuffer t : register(b0)
 {
     float4x4 t;
@@ -20,7 +26,7 @@ void RayGenMain()
 {
     RWTexture2D<float4> RenderTarget = ResourceDescriptorHeap[UAV];
     
-    float2 lerpValues = (float2) DispatchRaysIndex() / (float2) DispatchRaysDimensions();
+    float2 lerpValues = (float2) DispatchRaysIndex() / (float2) DispatchRaysDimensions(); // 1280, 720 -> [0..1]
     
     float3 rayDir = float3(0, 0, 1);
     float3 origin = float3(
@@ -35,6 +41,9 @@ void RayGenMain()
     ray.TMax = 10000.0;
     RayPayload payload = { float4(0, 0, 0, 0) };
     TraceRay(Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
+    
+    RayPayloadShadow s = { false };
+    
     
     RenderTarget[DispatchRaysIndex().xy] = payload.color;
 }
