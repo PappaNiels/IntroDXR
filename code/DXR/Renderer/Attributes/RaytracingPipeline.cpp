@@ -10,12 +10,19 @@
 
 RaytracingPipeline::RaytracingPipeline(std::string_view name, void* code)
 {
-	CreateGlobalRootSignature();
+	/*CreateGlobalRootSignature();
 	CreatePipeline();
-	CreateShaderTables();
+	CreateShaderTables();*/
 }
 
-void RaytracingPipeline::CreateGlobalRootSignature()
+RaytracingPipeline::RaytracingPipeline(const RaytracingPipelineDesc& desc)
+{
+	CreateGlobalRootSignature(desc);
+	CreatePipeline(desc);
+	CreateShaderTables(desc);
+}
+
+void RaytracingPipeline::CreateGlobalRootSignature(const RaytracingPipelineDesc& desc)
 {
 	auto device = Device::GetDevice().GetInternalDevice();
 
@@ -23,12 +30,12 @@ void RaytracingPipeline::CreateGlobalRootSignature()
 	params[0].InitAsConstants(17, 0);
 	params[1].InitAsShaderResourceView(0);
 
-	CD3DX12_ROOT_SIGNATURE_DESC desc(_countof(params), params, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED);
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(_countof(params), params, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED);
 
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
 	Microsoft::WRL::ComPtr<ID3DBlob> error;
 
-	auto hr = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error);
+	auto hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error);
 
 	if (FAILED(hr))
 	{
@@ -50,7 +57,7 @@ void RaytracingPipeline::CreateGlobalRootSignature()
 	}
 }
 
-void RaytracingPipeline::CreateShaderTables()
+void RaytracingPipeline::CreateShaderTables(const RaytracingPipelineDesc& desc)
 {
 	auto device = Device::GetDevice().GetInternalDevice();
 
@@ -157,7 +164,7 @@ void RaytracingPipeline::CreateShaderTables()
 	}
 }
 
-void RaytracingPipeline::CreatePipeline()
+void RaytracingPipeline::CreatePipeline(const RaytracingPipelineDesc& desc)
 {
 	auto device = Device::GetDevice().GetInternalDevice();
 

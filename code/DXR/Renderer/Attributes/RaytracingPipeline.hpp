@@ -2,6 +2,42 @@
 
 #include <wrl/client.h>
 
+struct HitGroupEntry
+{
+	HitGroupEntry(std::wstring_view entry, std::wstring_view hitGroup, D3D12_HIT_GROUP_TYPE type)
+		: ShaderEntry(entry)
+		, HitGroup(hitGroup)
+		, Type(type)
+	{
+	}
+
+	std::wstring_view ShaderEntry;
+	std::wstring_view HitGroup;
+	D3D12_HIT_GROUP_TYPE Type;
+};
+
+struct MissShaderEntry
+{
+	MissShaderEntry(std::wstring_view entry)
+		: EntryName(entry)
+	{
+	}
+
+	std::wstring_view EntryName;
+};
+
+struct RayGenEntry
+{
+	std::wstring_view EntryName;
+};
+
+struct RaytracingPipelineDesc
+{
+	RayGenEntry RayGenEntry;
+	std::vector<HitGroupEntry> HitGroups;
+	std::vector<MissShaderEntry> MissShaders;
+};
+
 class RaytracingPipeline
 {
 public:
@@ -38,17 +74,18 @@ public:
 		return m_RayGenShaderTable;
 	}
 
+	RaytracingPipeline(const RaytracingPipelineDesc& desc);
 protected:
 	friend class Renderer;
 	RaytracingPipeline(std::string_view name, void* shaderCode);
 
 private:
-	void CreateGlobalRootSignature();
+	void CreateGlobalRootSignature(const RaytracingPipelineDesc& desc);
 	//void CreateLocalRootSignatures();
 
-	void CreateShaderTables();
+	void CreateShaderTables(const RaytracingPipelineDesc& desc);
 
-	void CreatePipeline();
+	void CreatePipeline(const RaytracingPipelineDesc& desc);
 
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> m_RootSignature;
 	Microsoft::WRL::ComPtr<ID3D12StateObject> m_Pipeline;
