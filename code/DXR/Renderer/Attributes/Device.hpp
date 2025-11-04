@@ -21,6 +21,8 @@ public:
 		return *m_CommandQueue;
 	}
 
+	void Flush();
+
 protected:
 	friend class Renderer;
 	Device() = default;

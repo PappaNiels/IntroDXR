@@ -5,6 +5,7 @@
 
 #define SAMPLE(x) Renderer* CreateSample() { return new x();}
 
+
 class Renderer
 {
 public:
@@ -64,6 +65,5 @@ protected:
 
 	uint32_t m_Width;
 	uint32_t m_Height;
-
 };
 

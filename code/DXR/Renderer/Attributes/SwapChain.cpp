@@ -108,10 +108,20 @@ void SwapChain::Present(Microsoft::WRL::ComPtr<ID3D12Resource> renderTarget)
 
 void SwapChain::Resize(uint32_t width, uint32_t height)
 {
-	m_SwapChain->ResizeBuffers(ms_BackBufferCount, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+    for (auto& backBuffer : m_BackBuffers)
+    {
+        backBuffer.Reset();
+    }
+
+    if (FAILED(m_SwapChain->ResizeBuffers(ms_BackBufferCount, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0)))
+    {
+        DebugBreak();
+    }
 
 	for (uint32_t i = 0; i < ms_BackBufferCount; i++)
 	{
 		m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&m_BackBuffers[i]));
 	}
+
+    m_CurrentBackBuffer = m_SwapChain->GetCurrentBackBufferIndex();
 }

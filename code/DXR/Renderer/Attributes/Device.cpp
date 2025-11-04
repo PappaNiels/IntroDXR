@@ -165,3 +165,8 @@ void Device::Debug(D3D12_MESSAGE_CATEGORY Category, D3D12_MESSAGE_SEVERITY Sever
 
 	printf(str.c_str());
 }
+
+void Device::Flush()
+{
+	m_CommandQueue->Flush();
+}
