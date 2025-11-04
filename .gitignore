@@ -416,3 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Shader output
+*_Release.hpp
+*_Debug.hpp
