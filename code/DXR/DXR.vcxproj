@@ -79,6 +79,9 @@
       <VariableName>g_%(Filename)</VariableName>
       <AdditionalOptions>-Qembed_debug %(AdditionalOptions)</AdditionalOptions>
     </FxCompile>
+    <Lib>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -105,6 +108,9 @@
       <HeaderFileOutput>Renderer\Shaders\%(Filename)_$(Configuration).hpp</HeaderFileOutput>
       <VariableName>g_%(Filename)</VariableName>
     </FxCompile>
+    <Lib>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Renderer\Attributes\RaytracingPipeline.cpp" />
