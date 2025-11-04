@@ -14,10 +14,8 @@ struct RayPayloadShadow
     bool IsOccluded;
 };
 
-
 cbuffer t : register(b0)
 {
-    float4x4 t;
     uint UAV;
 }
 

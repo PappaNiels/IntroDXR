@@ -39,6 +39,8 @@ struct RayGenEntry
 
 struct RaytracingPipelineDesc
 {
+	D3D12_ROOT_SIGNATURE_DESC RootSignatureDesc;
+
 	RayGenEntry RayGenEntry;
 	std::vector<HitGroupEntry> HitGroups;
 	std::vector<MissShaderEntry> MissShaders;

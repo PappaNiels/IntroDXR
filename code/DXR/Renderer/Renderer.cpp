@@ -86,25 +86,7 @@ void Renderer::Render()
 
 	cmdList->SetDescriptorHeaps(1, m_ShaderHeap->GetHeap().GetAddressOf());
 
-	cmdList->SetComputeRootSignature(m_Pipeline->GetRootSignature().Get());
-	cmdList->SetComputeRoot32BitConstants(0, 1, &m_UAV, 16);
-	cmdList->SetComputeRootShaderResourceView(1, m_TLAS->GetGPUVirtualAddress());
-
-	D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
-	dispatchDesc.HitGroupTable.StartAddress = m_Pipeline->GetHitGroupTable()->GetGPUVirtualAddress();
-	dispatchDesc.HitGroupTable.SizeInBytes = m_Pipeline->GetHitGroupTable()->GetDesc().Width;
-	dispatchDesc.HitGroupTable.StrideInBytes = dispatchDesc.HitGroupTable.SizeInBytes;
-	dispatchDesc.MissShaderTable.StartAddress = m_Pipeline->GetMissTable()->GetGPUVirtualAddress();
-	dispatchDesc.MissShaderTable.SizeInBytes = m_Pipeline->GetMissTable()->GetDesc().Width;
-	dispatchDesc.MissShaderTable.StrideInBytes = dispatchDesc.MissShaderTable.SizeInBytes;
-	dispatchDesc.RayGenerationShaderRecord.StartAddress = m_Pipeline->GetRayGenTable()->GetGPUVirtualAddress();
-	dispatchDesc.RayGenerationShaderRecord.SizeInBytes = m_Pipeline->GetRayGenTable()->GetDesc().Width;
-	dispatchDesc.Width = m_Width;
-	dispatchDesc.Height = m_Height;
-	dispatchDesc.Depth = 1;
-
-	cmdList->SetPipelineState1(m_Pipeline->GetStateObject().Get());
-	cmdList->DispatchRays(&dispatchDesc);
+	RenderSample(cmdList);
 
 	//auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(m_RenderTarget.Get());
 
@@ -117,6 +99,7 @@ void Renderer::Render()
 
 void Renderer::Resize(uint32_t width, uint32_t height)
 {
+	
 }
 
 void Renderer::CreateRenderWindow()

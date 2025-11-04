@@ -4,8 +4,6 @@
 #include "Device.hpp"
 
 #include <Utils/Error.hpp>
-
-#include <Renderer/Shaders/RaytracingBasic_Debug.hpp>
 #include <Utils/Assert.hpp>
 
 RaytracingPipeline::RaytracingPipeline(std::string_view name, void* code)
@@ -35,7 +33,7 @@ void RaytracingPipeline::CreateGlobalRootSignature(const RaytracingPipelineDesc&
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
 	Microsoft::WRL::ComPtr<ID3DBlob> error;
 
-	auto hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error);
+	auto hr = D3D12SerializeRootSignature(&desc.RootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error);
 
 	if (FAILED(hr))
 	{
@@ -171,8 +169,7 @@ void RaytracingPipeline::CreatePipeline(const RaytracingPipelineDesc& desc)
 	CD3DX12_STATE_OBJECT_DESC pipeline{ D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE };
 
 	auto* library = pipeline.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
-	D3D12_SHADER_BYTECODE code = CD3DX12_SHADER_BYTECODE(g_RaytracingBasic, _countof(g_RaytracingBasic));
-	library->SetDXILLibrary(&code);
+	library->SetDXILLibrary(&desc.ShaderCode);
 
 	// Define function entries
 	/*library->DefineExport(desc.RayGenEntry.EntryName.data());
@@ -185,7 +182,7 @@ void RaytracingPipeline::CreatePipeline(const RaytracingPipelineDesc& desc)
 	hitGroup->SetHitGroupType(desc.HitGroups[0].Type);
 
 	auto* shaderConfig = pipeline.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-	shaderConfig->Config(4 * sizeof(float), 2 * sizeof(float));
+	shaderConfig->Config(desc.PayloadSize, desc.AttributeSize);
 
 	// create local root signatures
 
