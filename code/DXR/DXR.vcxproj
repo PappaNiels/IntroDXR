@@ -118,6 +118,7 @@
     <ClCompile Include="Renderer\Attributes\CommandQueue.cpp" />
     <ClCompile Include="Renderer\Attributes\Device.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Renderer\Helper.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Attributes\SwapChain.cpp" />
     <ClCompile Include="Utils\Assert.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="Renderer\Attributes\DescriptorHeap.hpp" />
     <ClInclude Include="Renderer\Attributes\CommandQueue.hpp" />
     <ClInclude Include="Renderer\Attributes\Device.hpp" />
+    <ClInclude Include="Renderer\Helper.hpp" />
     <ClInclude Include="Renderer\Renderer.hpp" />
     <ClInclude Include="Renderer\Attributes\SwapChain.hpp" />
     <ClInclude Include="Renderer\Shaders\Shared.hpp" />
