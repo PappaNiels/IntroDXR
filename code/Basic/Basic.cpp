@@ -3,7 +3,6 @@
 #include <DXR/Renderer/Renderer.hpp>
 #include <DXR/Renderer/Attributes/RaytracingPipeline.hpp>
 
-
 class Basic : public Renderer
 {
 public:
@@ -11,18 +10,15 @@ public:
 	void RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList) override;
 };
 
-
-Renderer* CreateSample()
-{
-	return new Basic();
-}
+SAMPLE(Basic);
 
 void Basic::InitializeSample()
 {
 	RaytracingPipelineDesc desc = {};
 	desc.RayGenEntry.EntryName = L"RayGenMain";
-	desc.HitGroups.emplace_back(L"ClosestHitMain", L"HitGroup", D3D12_HIT_GROUP_TYPE_PROCEDURAL_PRIMITIVE);
+	desc.HitGroups.emplace_back(L"ClosestMain", L"HitGroup", D3D12_HIT_GROUP_TYPE_TRIANGLES);
 	desc.MissShaders.emplace_back(L"MissMain");
+	desc.RecursionDepth = 1;
 
 	m_Pipeline = new RaytracingPipeline(desc);
 }

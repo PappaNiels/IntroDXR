@@ -67,9 +67,9 @@ void RaytracingPipeline::CreateShaderTables(const RaytracingPipelineDesc& desc)
 
 	auto GetShaderIdentifiers = [&](auto* stateObjectProperties)
 		{
-			rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"RayGenMain");
-			missShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MissMain");
-			hitGroupShaderIdentifier = stateObjectProperties->GetShaderIdentifier(L"MyHitGroup");
+			rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(desc.RayGenEntry.EntryName.data());
+			missShaderIdentifier = stateObjectProperties->GetShaderIdentifier(desc.MissShaders[0].EntryName.data());
+			hitGroupShaderIdentifier = stateObjectProperties->GetShaderIdentifier(desc.HitGroups[0].HitGroup.data());
 		};
 
 	// Get shader identifiers.
@@ -175,25 +175,25 @@ void RaytracingPipeline::CreatePipeline(const RaytracingPipelineDesc& desc)
 	library->SetDXILLibrary(&code);
 
 	// Define function entries
-	library->DefineExport(L"RayGenMain");
-	library->DefineExport(L"ClosestMain");
-	library->DefineExport(L"MissMain");
+	/*library->DefineExport(desc.RayGenEntry.EntryName.data());
+	library->DefineExport(desc.HitGroups[0].ShaderEntry.data());
+	library->DefineExport(desc.MissShaders[0].EntryName.data());*/
 
 	auto* hitGroup = pipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
-	hitGroup->SetClosestHitShaderImport(L"ClosestMain");
-	hitGroup->SetHitGroupExport(L"MyHitGroup");
-	hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
+	hitGroup->SetClosestHitShaderImport(desc.HitGroups[0].ShaderEntry.data());
+	hitGroup->SetHitGroupExport(desc.HitGroups[0].HitGroup.data());
+	hitGroup->SetHitGroupType(desc.HitGroups[0].Type);
 
 	auto* shaderConfig = pipeline.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
 	shaderConfig->Config(4 * sizeof(float), 2 * sizeof(float));
 
-	// create local root signature
+	// create local root signatures
 
 	auto* globalRS = pipeline.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
 	globalRS->SetRootSignature(m_RootSignature.Get());
 
 	auto pipelineConfig = pipeline.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
-	pipelineConfig->Config(1); // set recursion
+	pipelineConfig->Config(desc.RecursionDepth);
 
 	auto hr = device->CreateStateObject(pipeline, IID_PPV_ARGS(&m_Pipeline));
 

@@ -1,5 +1,11 @@
 #pragma once
 
+#include <cstdint>
+#include <string_view>
+#include <vector>
+
+#include <d3d12.h>
+
 #include <wrl/client.h>
 
 struct HitGroupEntry
@@ -36,6 +42,13 @@ struct RaytracingPipelineDesc
 	RayGenEntry RayGenEntry;
 	std::vector<HitGroupEntry> HitGroups;
 	std::vector<MissShaderEntry> MissShaders;
+
+	D3D12_SHADER_BYTECODE ShaderCode;
+
+	uint32_t PayloadSize;
+	uint32_t AttributeSize;
+
+	uint32_t RecursionDepth = 1;
 };
 
 class RaytracingPipeline

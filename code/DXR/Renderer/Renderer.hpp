@@ -3,6 +3,8 @@
 #include <wrl/client.h>
 #include <dxgi1_6.h>
 
+#define SAMPLE(x) Renderer* CreateSample() { return new x();}
+
 class Renderer
 {
 public:
