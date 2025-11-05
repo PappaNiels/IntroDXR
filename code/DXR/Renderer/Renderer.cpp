@@ -12,6 +12,7 @@
 
 #include <DirectXMath.h>
 #include <Utils/Assert.hpp>
+#include "Helper.hpp"
 
 Renderer* g_Renderer = nullptr;
 
