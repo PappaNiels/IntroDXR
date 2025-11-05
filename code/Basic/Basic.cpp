@@ -25,6 +25,8 @@ public:
 
 SAMPLE(Basic);
 
+std::wstring Renderer::ms_SampleName = L"Basic";
+
 void Basic::InitializeSample()
 {
 	RaytracingPipelineDesc desc = {};
