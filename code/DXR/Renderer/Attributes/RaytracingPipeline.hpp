@@ -56,14 +56,6 @@ struct RaytracingPipelineDesc
 class RaytracingPipeline
 {
 public:
-
-	enum
-	{
-		Constants, // 17
-		TLAS,
-		Count
-	};
-
 	Microsoft::WRL::ComPtr<ID3D12StateObject> GetStateObject() const
 	{
 		return m_Pipeline;
