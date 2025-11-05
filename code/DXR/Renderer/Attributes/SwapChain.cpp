@@ -113,7 +113,9 @@ void SwapChain::Resize(uint32_t width, uint32_t height)
         backBuffer.Reset();
     }
 
-    if (FAILED(m_SwapChain->ResizeBuffers(ms_BackBufferCount, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0)))
+    auto desc = m_BackBuffers[0]->GetDesc();
+
+    if (FAILED(m_SwapChain->ResizeBuffers(ms_BackBufferCount, width, height, desc.Format, desc.Flags)))
     {
         DebugBreak();
     }
