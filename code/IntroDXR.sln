@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{5AFE
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Basic", "Basic\Basic.vcxproj", "{43E47369-D791-4BEC-94E8-3857103A1E2B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lighting", "Lighting\Lighting.vcxproj", "{5292B705-EBEB-47AC-9DFE-5577A84A00CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win64 = Debug|Win64
@@ -29,12 +31,17 @@ Global
 		{43E47369-D791-4BEC-94E8-3857103A1E2B}.Debug|Win64.Build.0 = Debug|x64
 		{43E47369-D791-4BEC-94E8-3857103A1E2B}.Release|Win64.ActiveCfg = Release|x64
 		{43E47369-D791-4BEC-94E8-3857103A1E2B}.Release|Win64.Build.0 = Release|x64
+		{5292B705-EBEB-47AC-9DFE-5577A84A00CB}.Debug|Win64.ActiveCfg = Debug|x64
+		{5292B705-EBEB-47AC-9DFE-5577A84A00CB}.Debug|Win64.Build.0 = Debug|x64
+		{5292B705-EBEB-47AC-9DFE-5577A84A00CB}.Release|Win64.ActiveCfg = Release|x64
+		{5292B705-EBEB-47AC-9DFE-5577A84A00CB}.Release|Win64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{43E47369-D791-4BEC-94E8-3857103A1E2B} = {5AFEB4E4-CAB8-4BF0-9C7A-60F0F2F4A240}
+		{5292B705-EBEB-47AC-9DFE-5577A84A00CB} = {5AFEB4E4-CAB8-4BF0-9C7A-60F0F2F4A240}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1CC91A96-A386-48B0-B700-DD6216CF1B22}
