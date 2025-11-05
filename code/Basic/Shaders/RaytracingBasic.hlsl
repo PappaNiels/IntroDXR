@@ -14,9 +14,15 @@ struct RayPayloadShadow
     bool IsOccluded;
 };
 
-cbuffer t : register(b0)
+cbuffer RenderTarget : register(b0)
 {
     uint UAV;
+}
+
+float3 LinearToSRGB(float3 color)
+{
+    // Approximately pow(color, 1.0 / 2.2)
+    return color < 0.0031308 ? 12.92 * color : 1.055 * pow(abs(color), 1.0 / 2.4) - 0.055;
 }
 
 [shader("raygeneration")]
@@ -49,7 +55,9 @@ void RayGenMain()
 [shader("closesthit")]
 void ClosestMain(inout RayPayload payload, in MyAttributes attr)
 {
-    payload.color = 1.0f.xxxx;
+    float3 barycentrics = float3(1 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
+    
+    payload.color = float4(LinearToSRGB(barycentrics), 1.0f.x);
 }
 
 [shader("miss")]
