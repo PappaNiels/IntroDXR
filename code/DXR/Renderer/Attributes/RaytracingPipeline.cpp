@@ -24,12 +24,6 @@ void RaytracingPipeline::CreateGlobalRootSignature(const RaytracingPipelineDesc&
 {
 	auto device = Device::GetDevice().GetInternalDevice();
 
-	CD3DX12_ROOT_PARAMETER params[2] = {};
-	params[0].InitAsConstants(17, 0);
-	params[1].InitAsShaderResourceView(0);
-
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(_countof(params), params, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED);
-
 	Microsoft::WRL::ComPtr<ID3DBlob> blob;
 	Microsoft::WRL::ComPtr<ID3DBlob> error;
 
