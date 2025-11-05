@@ -23,7 +23,6 @@ Renderer::Renderer()
 	, m_HWND(nullptr)
 	, m_Width(1280)
 	, m_Height(720)
-	, m_IsInitialized(false)
 {
 }
 
@@ -32,7 +31,6 @@ Renderer::Renderer(uint32_t width, uint32_t height)
 	, m_HWND(nullptr)
 	, m_Width(width)
 	, m_Height(height)
-	, m_IsInitialized(false)
 {
 }
 
