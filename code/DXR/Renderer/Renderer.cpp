@@ -119,7 +119,7 @@ void Renderer::Resize(uint32_t width, uint32_t height)
 
 void Renderer::CreateRenderWindow()
 {
-	std::wstring windowName = L"Intro to DirectX Raytracing";
+	std::wstring windowName = L"Intro to DirectX Raytracing | " + ms_SampleName;
 
 	if (GetCLI().Validation)
 	{

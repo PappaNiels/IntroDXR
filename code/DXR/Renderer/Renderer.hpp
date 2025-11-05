@@ -65,5 +65,7 @@ protected:
 
 	uint32_t m_Width;
 	uint32_t m_Height;
+
+	static std::wstring ms_SampleName;
 };
 
