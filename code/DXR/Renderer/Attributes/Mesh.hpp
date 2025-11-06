@@ -9,16 +9,6 @@
 
 #include <DXR/Utils/Assert.hpp>
 
-struct MeshInstance
-{
-	class Mesh* Mesh;
-	DirectX::XMFLOAT4 Rotation;
-	DirectX::XMFLOAT3 Translation;
-	DirectX::XMFLOAT3 Scale;
-
-	bool IsDirty = true;
-};
-
 class Mesh
 {
 public:
@@ -122,3 +112,64 @@ inline void Mesh::SetIndexBuffer(uint64_t numIndices, const T* data)
 
 	SetBufferData(m_IndexBuffer, numIndices, sizeof(T), data);
 }
+
+class MeshInstance
+{
+public:
+	void SetMesh(Mesh* mesh)
+	{
+		m_Mesh = mesh;
+	}
+
+	D3D12_GPU_VIRTUAL_ADDRESS GetBLASAddress() const
+	{
+		return m_Mesh->GetBLASAddress();
+	}
+
+	_declspec(property(put = SetRotation)) DirectX::XMFLOAT4 Rotation;
+	_declspec(property(put = SetTranslation)) DirectX::XMFLOAT3 Translation;
+	_declspec(property(put = SetScale)) DirectX::XMFLOAT3 Scale;
+
+	void SetTranslation(const DirectX::XMFLOAT3& translation)
+	{
+		m_Translation = translation;
+		IsDirty = true;
+	}
+
+	void SetRotation(const DirectX::XMFLOAT4& rotation)
+	{
+		m_Rotation = rotation;
+		IsDirty = true;
+	}
+
+	void SetScale(const DirectX::XMFLOAT3& scale)
+	{
+		m_Scale = scale;
+		IsDirty = true;
+	}
+
+	DirectX::XMMATRIX GetMatrix() const
+	{
+		auto translation = DirectX::XMMatrixTranslation(m_Translation.x, m_Translation.y, m_Translation.z);
+		auto rotation = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&m_Rotation));
+		auto scale = DirectX::XMMatrixScaling(m_Scale.x, m_Scale.y, m_Scale.z);
+
+		return translation * rotation * scale;
+	}
+
+	operator bool() const
+	{
+		return m_Mesh != nullptr;
+	}
+
+private:
+	friend class TLAS;
+
+	Mesh* m_Mesh;
+
+	DirectX::XMFLOAT4 m_Rotation;
+	DirectX::XMFLOAT3 m_Translation;
+	DirectX::XMFLOAT3 m_Scale{ 1.0f, 1.0f, 1.0f };
+
+	bool IsDirty = true;
+};

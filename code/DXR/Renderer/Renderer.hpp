@@ -5,7 +5,6 @@
 
 #define SAMPLE(x) Renderer* CreateSample() { return new x();}
 
-
 class Renderer
 {
 public:
@@ -28,8 +27,6 @@ private:
 	void CreateRenderWindow();
 	void CreateRenderTarget();
 	void CreateCommandLists();
-	void CreateGeometry();
-	void CreateBVH();
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -50,12 +47,6 @@ protected:
 	ComPtr<ID3D12Resource> m_RenderTarget;
 	uint32_t m_RTV;
 	uint32_t m_UAV;
-
-	ComPtr<ID3D12Resource> m_VertexBuffer;
-	ComPtr<ID3D12Resource> m_IndexBuffer;
-
-	ComPtr<ID3D12Resource> m_TLAS;
-	ComPtr<ID3D12Resource> m_BLAS;
 
 	ComPtr<ID3D12GraphicsCommandList7> m_CommandList[2];
 	ComPtr<ID3D12CommandAllocator> m_CommandListAllocator[2];

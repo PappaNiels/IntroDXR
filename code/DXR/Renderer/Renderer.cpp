@@ -7,12 +7,13 @@
 
 #include "Attributes/RaytracingPipeline.hpp"
 
+#include "Helper.hpp" 
+
 #include <Utils/CLI.hpp>
 #include <Utils/Error.hpp>
+#include <Utils/Assert.hpp>
 
 #include <DirectXMath.h>
-#include <Utils/Assert.hpp>
-#include "Helper.hpp"
 
 Renderer* g_Renderer = nullptr;
 
@@ -59,9 +60,6 @@ void Renderer::Initialize()
 
 	CreateRenderTarget();
 	CreateCommandLists();
-
-	CreateGeometry();
-	CreateBVH();
 
 	InitializeSample();
 
@@ -195,141 +193,6 @@ void Renderer::CreateCommandLists()
 		device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_CommandListAllocator[i]));
 		device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_CommandListAllocator[i].Get(), nullptr, IID_PPV_ARGS(&m_CommandList[i]));
 	}
-}
-
-void Renderer::CreateGeometry()
-{
-	auto device = Device::GetDevice().GetInternalDevice();
-	
-	XMFLOAT3 positions[] = 
-	{ 
-		XMFLOAT3(0.0f, -0.7f, 1.0f), 
-		XMFLOAT3(-0.7f, 0.7f, 1.0f),
-		XMFLOAT3(0.7f, 0.7f, 1.0f)
-	};
-
-	uint16_t indices[] = { 0, 1, 2 };
-
-	auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-
-	{
-		auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(positions));
-
-		auto hr = device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_VertexBuffer));
-
-		if (FAILED(hr))
-		{
-			FatalError("Failed to create a vertex buffer. HResult: 0x%08X", hr);
-		}
-
-		void* data;
-		m_VertexBuffer->Map(0, nullptr, &data);
-		memcpy(data, positions, sizeof(positions));
-		m_VertexBuffer->Unmap(0, nullptr);
-	}
-
-	{
-		auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices));
-		
-		auto hr = device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_IndexBuffer));
-			
-		if (FAILED(hr))
-		{
-			FatalError("Failed to create a index buffer. HResult: 0x%08X", hr);
-		}
-
-		void* data;
-		m_IndexBuffer->Map(0, nullptr, &data);
-		memcpy(data, indices, sizeof(indices));
-		m_IndexBuffer->Unmap(0, nullptr);
-	}
-}
-
-void Renderer::CreateBVH()
-{
-	auto device = Device::GetDevice().GetInternalDevice();
-	auto& cmdQueue = Device::GetDevice().GetCommandQueue();
-
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList;
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> alloc;
-
-	device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&alloc));
-	device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, alloc.Get(), nullptr, IID_PPV_ARGS(&cmdList));
-
-	D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {};
-	geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-	geometryDesc.Triangles.IndexBuffer = m_IndexBuffer->GetGPUVirtualAddress();
-	geometryDesc.Triangles.IndexCount = static_cast<UINT>(m_IndexBuffer->GetDesc().Width) / sizeof(uint16_t);
-	geometryDesc.Triangles.IndexFormat = DXGI_FORMAT_R16_UINT;
-	geometryDesc.Triangles.Transform3x4 = 0;
-	geometryDesc.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
-	geometryDesc.Triangles.VertexCount = static_cast<UINT>(m_VertexBuffer->GetDesc().Width) / sizeof(XMFLOAT3);
-	geometryDesc.Triangles.VertexBuffer.StartAddress = m_VertexBuffer->GetGPUVirtualAddress();
-	geometryDesc.Triangles.VertexBuffer.StrideInBytes = sizeof(XMFLOAT3);
-	geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
-	                  
-	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS buildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
-	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS topLevelInputs = {};
-	topLevelInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	topLevelInputs.Flags = buildFlags;
-	topLevelInputs.NumDescs = 1;
-	topLevelInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
-
-	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO topLevelPrebuildInfo = {};
-	device->GetRaytracingAccelerationStructurePrebuildInfo(&topLevelInputs, &topLevelPrebuildInfo);
-	ASSERT(topLevelPrebuildInfo.ResultDataMaxSizeInBytes > 0, "...");
-
-	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO bottomLevelPrebuildInfo = {};
-	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS bottomLevelInputs = topLevelInputs;
-	bottomLevelInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
-	bottomLevelInputs.pGeometryDescs = &geometryDesc;
-	device->GetRaytracingAccelerationStructurePrebuildInfo(&bottomLevelInputs, &bottomLevelPrebuildInfo);
-	ASSERT(bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes > 0, "");
-
-
-	ComPtr<ID3D12Resource> scratchResource;
-	AllocateUAVBuffer(device.Get(), std::max(topLevelPrebuildInfo.ScratchDataSizeInBytes, bottomLevelPrebuildInfo.ScratchDataSizeInBytes), &scratchResource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, L"ScratchResource");
-
-	{
-		D3D12_RESOURCE_STATES initialResourceState = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
-
-		AllocateUAVBuffer(device.Get(), bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes, &m_BLAS, initialResourceState, L"BottomLevelAccelerationStructure");
-		AllocateUAVBuffer(device.Get(), topLevelPrebuildInfo.ResultDataMaxSizeInBytes, &m_TLAS, initialResourceState, L"TopLevelAccelerationStructure");
-	}
-
-	ComPtr<ID3D12Resource> instanceDescs;
-	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
-	instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
-	instanceDesc.InstanceMask = 1;
-	instanceDesc.AccelerationStructure = m_BLAS->GetGPUVirtualAddress();
-	AllocateUploadBuffer(device.Get(), &instanceDesc, sizeof(instanceDesc), &instanceDescs, L"InstanceDescs");
-
-	// Bottom Level Acceleration Structure desc
-	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC bottomLevelBuildDesc = {};
-	{
-		bottomLevelBuildDesc.Inputs = bottomLevelInputs;
-		bottomLevelBuildDesc.ScratchAccelerationStructureData = scratchResource->GetGPUVirtualAddress();
-		bottomLevelBuildDesc.DestAccelerationStructureData = m_BLAS->GetGPUVirtualAddress();
-	}
-
-	// Top Level Acceleration Structure desc
-	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC topLevelBuildDesc = {};
-	{
-		topLevelInputs.InstanceDescs = instanceDescs->GetGPUVirtualAddress();
-		topLevelBuildDesc.Inputs = topLevelInputs;
-		topLevelBuildDesc.DestAccelerationStructureData = m_TLAS->GetGPUVirtualAddress();
-		topLevelBuildDesc.ScratchAccelerationStructureData = scratchResource->GetGPUVirtualAddress();
-	}
-
-	cmdList->BuildRaytracingAccelerationStructure(&bottomLevelBuildDesc, 0, nullptr);
-	
-	auto uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(m_BLAS.Get());
-	cmdList->ResourceBarrier(1, &uavBarrier);
-
-	cmdList->BuildRaytracingAccelerationStructure(&topLevelBuildDesc, 0, nullptr);
-
-	auto fence = cmdQueue.ExecuteCommandLists({ cmdList.Get() });
-	cmdQueue.WaitForFence(fence);
 }
 
 LRESULT Renderer::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)

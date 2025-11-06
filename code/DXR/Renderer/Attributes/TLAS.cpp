@@ -36,16 +36,28 @@ void TLAS::Build()
 
 	for (const auto& mesh : m_Meshes)
 	{
-		if (mesh == nullptr || mesh->Mesh == nullptr)
+		if (mesh == nullptr || !mesh)
 		{
 			continue;
 		}
 
+		auto transform = mesh->GetMatrix();
+		auto m = XMMatrixTranspose(transform);
+
 		D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
-		instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
 		instanceDesc.InstanceMask = 1;
-		instanceDesc.AccelerationStructure = mesh->Mesh->GetBLASAddress();
+		instanceDesc.AccelerationStructure = mesh->GetBLASAddress();
 		instanceDesc.InstanceID = 0;
+		
+		/*for (int i = 0; i < 3; ++i)
+		{
+			instanceDesc.Transform[i][0] = DirectX::XMVectorGetX(m.r[i]);
+			instanceDesc.Transform[i][1] = DirectX::XMVectorGetY(m.r[i]);
+			instanceDesc.Transform[i][2] = DirectX::XMVectorGetZ(m.r[i]);
+			instanceDesc.Transform[i][3] = DirectX::XMVectorGetW(m.r[i]);
+		}*/
+
+		instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
 
 		meshes.push_back(instanceDesc);
 	}
@@ -74,7 +86,7 @@ void TLAS::Build(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList)
 	bool isDirty = false;
 	for (const auto& mesh : m_Meshes)
 	{
-		if (mesh == nullptr || mesh->Mesh == nullptr)
+		if (mesh == nullptr || !mesh)
 		{
 			continue;
 		}
@@ -115,7 +127,7 @@ void TLAS::Build(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList)
 
 	for (const auto& mesh : m_Meshes)
 	{
-		if (mesh == nullptr || mesh->Mesh == nullptr)
+		if (mesh == nullptr || !mesh)
 		{
 			continue;
 		}
@@ -123,7 +135,7 @@ void TLAS::Build(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList)
 		D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
 		instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
 		instanceDesc.InstanceMask = 1;
-		instanceDesc.AccelerationStructure = mesh->Mesh->GetBLASAddress();
+		instanceDesc.AccelerationStructure = mesh->GetBLASAddress();
 		instanceDesc.InstanceID = 0;
 
 		meshes.push_back(instanceDesc);
