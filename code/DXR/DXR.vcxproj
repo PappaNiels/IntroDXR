@@ -46,12 +46,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\Core\</OutDir>
     <TargetName>DXRCore_$(Platform)_$(Configuration)</TargetName>
     <MultiProcFXC>false</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\Core\</OutDir>
     <TargetName>DXRCore_$(Platform)_$(Configuration)</TargetName>
     <MultiProcFXC>false</MultiProcFXC>
   </PropertyGroup>
@@ -63,7 +63,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\vendor\DirectXMath\Inc\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)..\vendor\DirectXMath\Inc\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
@@ -93,7 +93,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)..\vendor\DirectXMath\Inc\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)..\vendor\DirectXMath\Inc\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
@@ -113,6 +113,8 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Renderer\Attributes\Mesh.cpp" />
+    <ClCompile Include="Renderer\Attributes\TLAS.cpp" />
     <ClCompile Include="Renderer\Attributes\RaytracingPipeline.cpp" />
     <ClCompile Include="Renderer\Attributes\DescriptorHeap.cpp" />
     <ClCompile Include="Renderer\Attributes\CommandQueue.cpp" />
@@ -130,6 +132,8 @@
     <ClCompile Include="Utils\Error.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Renderer\Attributes\Mesh.hpp" />
+    <ClInclude Include="Renderer\Attributes\TLAS.hpp" />
     <ClInclude Include="Renderer\Attributes\RaytracingPipeline.hpp" />
     <ClInclude Include="Renderer\Attributes\DescriptorHeap.hpp" />
     <ClInclude Include="Renderer\Attributes\CommandQueue.hpp" />
