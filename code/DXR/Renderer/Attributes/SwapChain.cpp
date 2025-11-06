@@ -10,6 +10,8 @@
 
 void SwapChain::Initialize(HWND hwnd, uint32_t width, uint32_t height)
 {
+    m_TearingSupported = 1;
+
     auto& device = Device::GetDevice();
 
     Microsoft::WRL::ComPtr<IDXGISwapChain4> dxgiSwapChain4;
