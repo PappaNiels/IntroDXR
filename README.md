@@ -18,6 +18,10 @@ If you want to read my posts, have a look at the articles:
         - Windows SDK 10.0.22621.0 or higher
         - HLSL Tools (?)
 - A GPU with D3D12 support, shader model 6.6 support, and ray tracing capabilities.
+- Git
+
+### Downloading the code
+To download the code, clone the repo by using `git clone https://github.com/PappaNiels/IntroDXR.git`. Then to get the submodules, use `git submodule update --init`, to make sure you have all the dependencies.
 
 ### Building the code
 To build the code, open the visual studio solution. Select the sample you want to view, by setting the start project to the sample project. Press `F5` to build and run with the debugger attached, or press `ctrl + b` on the sample project to just build the executable. No further steps are needed to run the sample.
