@@ -4,6 +4,11 @@ This repository is the code for the three part article series called 'Intro to D
 
 Have a look at the samples, to get familiar with the framework and what is possible with the API. Anything from a simple triangle, to basic lighting (wip).
 
+If you want to read my posts, have a look at the articles:
+- [Part 1 (the concepts)](https://pappaniels.github.io/posts/intro-dxr/part-1) (wip)
+- [Part 2 (the implementation)]() (wip)
+- [Part 3 (debugging the ray tracer)]() (wip)
+
 ## Building
 
 ### Dependencies
@@ -30,3 +35,6 @@ This codebase that can be found under [`code/`](https://github.com/PappaNiels/In
 
 ## Contributing
 If there are bugs, ways to optimize the code, or make it a better structure to make the library easier to use. Feel free to contribute to the repository. 
+
+## Contact
+If there are any concerns or questions, reach out to me via my contact details or discord (pappaniels).
