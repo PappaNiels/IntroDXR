@@ -6,7 +6,7 @@
 #include <Utils/Error.hpp>
 #include <Utils/Assert.hpp>
 
-RaytracingPipeline::RaytracingPipeline(std::string_view name, void* code)
+RaytracingPipeline::RaytracingPipeline(std::string_view, void*)
 {
 	/*CreateGlobalRootSignature();
 	CreatePipeline();
@@ -51,32 +51,33 @@ void RaytracingPipeline::CreateGlobalRootSignature(const RaytracingPipelineDesc&
 
 void RaytracingPipeline::CreateShaderTables(const RaytracingPipelineDesc& desc)
 {
+	// we do not support local root signatures (yet). support would mean that the buffer creation needs to be more flexable.
+
 	auto device = Device::GetDevice().GetInternalDevice();
 
 	void* rayGenShaderIdentifier;
-	void* missShaderIdentifier;
-	void* hitGroupShaderIdentifier;
+	//void* missShaderIdentifier;
+	//void* hitGroupShaderIdentifier;
 
 	auto GetShaderIdentifiers = [&](auto* stateObjectProperties)
 		{
 			rayGenShaderIdentifier = stateObjectProperties->GetShaderIdentifier(desc.RayGenEntry.EntryName.data());
-			missShaderIdentifier = stateObjectProperties->GetShaderIdentifier(desc.MissShaders[0].EntryName.data());
-			hitGroupShaderIdentifier = stateObjectProperties->GetShaderIdentifier(desc.HitGroups[0].HitGroup.data());
+			//missShaderIdentifier = stateObjectProperties->GetShaderIdentifier(desc.MissShaders[0].EntryName.data());
+			//hitGroupShaderIdentifier = stateObjectProperties->GetShaderIdentifier(desc.HitGroups[0].HitGroup.data());
 		};
 
 	// Get shader identifiers.
 	uint32_t shaderIdentifierSize;
+
+	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> stateObjectProperties;
+
+	auto hr = m_Pipeline.As(&stateObjectProperties);
+	if (FAILED(hr))
 	{
-		Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> stateObjectProperties;
-		
-		auto hr = m_Pipeline.As(&stateObjectProperties);
-		if (FAILED(hr))
-		{
-			FatalError("...");
-		}
-		GetShaderIdentifiers(stateObjectProperties.Get());
-		shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+		FatalError("...");
 	}
+	GetShaderIdentifiers(stateObjectProperties.Get());
+	shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 
 	const uint32_t shaderRecordAlignment = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
 
@@ -107,12 +108,14 @@ void RaytracingPipeline::CreateShaderTables(const RaytracingPipelineDesc& desc)
 		m_RayGenShaderTable->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
 		memcpy(mappedData, rayGenShaderIdentifier, shaderIdentifierSize);
 		m_RayGenShaderTable->Unmap(0, nullptr);
+
+		m_RayGenShaderTable->SetName(L"Ray Generation Shader Table");
 	}
 
 	// Miss
 	{
 		UINT shaderRecordSize = Align(shaderIdentifierSize, shaderRecordAlignment);
-		UINT tableSize = shaderRecordSize;
+		UINT tableSize = shaderRecordSize * static_cast<uint32_t>(desc.MissShaders.size());
 
 		CD3DX12_RESOURCE_DESC descShader = CD3DX12_RESOURCE_DESC::Buffer(tableSize, D3D12_RESOURCE_FLAG_NONE);
 		CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
@@ -128,14 +131,24 @@ void RaytracingPipeline::CreateShaderTables(const RaytracingPipelineDesc& desc)
 
 		uint8_t* mappedData = nullptr;
 		m_MissShaderTable->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
-		memcpy(mappedData, missShaderIdentifier, shaderIdentifierSize);
+
+		uint32_t offset = 0;
+		for (const auto& miss : desc.MissShaders)
+		{
+			auto* missShader = stateObjectProperties->GetShaderIdentifier(miss.EntryName.data());
+			memcpy(mappedData + offset * shaderIdentifierSize, missShader, shaderIdentifierSize);
+
+			offset++;
+		}
+
 		m_MissShaderTable->Unmap(0, nullptr);
+		m_RayGenShaderTable->SetName(L"Miss Shader Table");
 	}
 
 	// Hit
 	{
 		const UINT shaderRecordSize = Align(shaderIdentifierSize, shaderRecordAlignment);
-		const UINT tableSize = Align(shaderRecordSize, shaderRecordAlignment);
+		const UINT tableSize = shaderRecordSize * static_cast<uint32_t>(desc.HitGroups.size());
 
 		CD3DX12_RESOURCE_DESC descShader = CD3DX12_RESOURCE_DESC::Buffer(tableSize, D3D12_RESOURCE_FLAG_NONE);
 		CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
@@ -151,8 +164,18 @@ void RaytracingPipeline::CreateShaderTables(const RaytracingPipelineDesc& desc)
 
 		uint8_t* mappedData = nullptr;
 		m_HitShaderTable->Map(0, nullptr, reinterpret_cast<void**>(&mappedData));
-		memcpy(mappedData, hitGroupShaderIdentifier, shaderIdentifierSize);
+
+		uint32_t offset = 0;
+		for (const auto& hit : desc.HitGroups)
+		{
+			auto* hitGroup = stateObjectProperties->GetShaderIdentifier(hit.HitGroup.data());
+			memcpy(mappedData + offset * shaderIdentifierSize, hitGroup, shaderIdentifierSize);
+
+			offset++;
+		}
+
 		m_HitShaderTable->Unmap(0, nullptr);
+		m_RayGenShaderTable->SetName(L"Hit Group Shader Table");
 	}
 }
 
@@ -170,10 +193,18 @@ void RaytracingPipeline::CreatePipeline(const RaytracingPipelineDesc& desc)
 	library->DefineExport(desc.HitGroups[0].ShaderEntry.data());
 	library->DefineExport(desc.MissShaders[0].EntryName.data());*/
 
-	auto* hitGroup = pipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
-	hitGroup->SetClosestHitShaderImport(desc.HitGroups[0].ShaderEntry.data());
-	hitGroup->SetHitGroupExport(desc.HitGroups[0].HitGroup.data());
-	hitGroup->SetHitGroupType(desc.HitGroups[0].Type);
+	for (const auto& hit : desc.HitGroups)
+	{
+		auto* hitGroup = pipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+		
+		if (!hit.ShaderEntry.empty())
+		{
+			hitGroup->SetClosestHitShaderImport(hit.ShaderEntry.data());
+		}
+
+		hitGroup->SetHitGroupExport(hit.HitGroup.data());
+		hitGroup->SetHitGroupType(hit.Type);
+	}
 
 	auto* shaderConfig = pipeline.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
 	shaderConfig->Config(desc.PayloadSize, desc.AttributeSize);
