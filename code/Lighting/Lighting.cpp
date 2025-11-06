@@ -40,6 +40,7 @@ private:
 	{
 		XMMATRIX InverseViewProjection;
 		XMVECTOR Position;
+		XMVECTOR Rotation;
 
 	}*m_Camera = nullptr;
 };
@@ -83,12 +84,12 @@ void Lighting::InitializeSample()
 	};
 
 	uint32_t indices[] = {
-		0,  1,  2,  0,  2,  3,
-		4,  5,  6,  4,  6,  7,
-		8,  9, 10,  8, 10, 11,
-		12, 13, 14, 12, 14, 15,
-		16, 17, 18, 16, 18, 19,
-		20, 21, 22, 20, 22, 23
+		0,  2,  1,  0,  3,  2,
+		4,  6,  5,  4,  7,  6,
+		8,  10, 9,  8, 11, 10,
+		12, 14, 13, 12, 15, 14,
+		16, 18, 17, 16, 19, 18,
+		20, 22, 21, 20, 23, 22
 	};
 
 	m_Mesh = new Mesh();
@@ -131,6 +132,7 @@ void Lighting::InitializeSample()
 	}
 
 	m_Camera->Position = XMVectorSet(0.0f, -1.0f, 0.0f, 1.0f);
+	m_Camera->Rotation = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 
@@ -169,37 +171,64 @@ void Lighting::Update(float deltaTime)
 
 	XMVECTOR dT = XMVectorSet(deltaTime, deltaTime, deltaTime, 0.0f);
 
+	if (GetAsyncKeyState(VK_UP) & 0x8000)
+	{
+		m_Camera->Rotation += XMVectorMultiply(right, dT);
+	}
+
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+	{
+		m_Camera->Rotation -= XMVectorMultiply(right, dT);
+	}
+
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+	{
+		m_Camera->Rotation += XMVectorMultiply(up, dT);
+	}
+
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	{
+		m_Camera->Rotation -= XMVectorMultiply(up, dT);
+	}
+
+	m_Camera->Rotation = XMVectorMin(m_Camera->Rotation, XMVectorSet(XMConvertToRadians(90.0f), XMConvertToRadians(90.0f), XMConvertToRadians(180.0f), XMConvertToRadians(90.0f)));
+	m_Camera->Rotation = XMVectorMax(m_Camera->Rotation, XMVectorSet(XMConvertToRadians(-90.0f), XMConvertToRadians(-90.0f), XMConvertToRadians(-180.0f), XMConvertToRadians(-90.0f)));
+
+	XMVECTOR fwd = XMVector3Normalize(XMVector3Rotate(forward, XMQuaternionRotationRollPitchYawFromVector(m_Camera->Rotation)));
+	XMVECTOR rgt = XMVector3Normalize(XMVector3Rotate(right, XMQuaternionRotationRollPitchYawFromVector(m_Camera->Rotation)));
+	XMVECTOR u = XMVector3Cross(fwd, rgt);
+
 	if (GetAsyncKeyState('W') & 0x8000)
 	{
-		m_Camera->Position += XMVectorMultiply(forward, dT);
+		m_Camera->Position += XMVectorMultiply(fwd, dT);
 	}
 
 	if (GetAsyncKeyState('S') & 0x8000)
 	{
-		m_Camera->Position -= XMVectorMultiply(forward, dT);
+		m_Camera->Position -= XMVectorMultiply(fwd, dT);
 	}
 
 	if (GetAsyncKeyState('D') & 0x8000)
 	{
-		m_Camera->Position += XMVectorMultiply(right, dT);
+		m_Camera->Position += XMVectorMultiply(XMVector3Cross(fwd, up), dT);
 	}
 
 	if (GetAsyncKeyState('A') & 0x8000)
 	{
-		m_Camera->Position -= XMVectorMultiply(right, dT);
+		m_Camera->Position -= XMVectorMultiply(XMVector3Cross(fwd, up), dT);
 	}
 
 	if (GetAsyncKeyState('Q') & 0x8000)
 	{
-		m_Camera->Position += XMVectorMultiply(up, dT);
+		m_Camera->Position += XMVectorMultiply(u, dT);
 	}
 
 	if (GetAsyncKeyState('E') & 0x8000)
 	{
-		m_Camera->Position -= XMVectorMultiply(up, dT);
+		m_Camera->Position -= XMVectorMultiply(u, dT);
 	}
 
-	auto view = XMMatrixLookAtRH(m_Camera->Position, m_Camera->Position + forward, up);
+	auto view = XMMatrixLookAtRH(m_Camera->Position, m_Camera->Position + XMVector3Normalize(fwd), up);
 	auto projection = XMMatrixPerspectiveFovRH(XMConvertToRadians(55.0f), static_cast<float>(m_Width) / m_Height, 0.01f, 100.0f);
 	auto vp = XMMatrixMultiply(view, projection);
 
