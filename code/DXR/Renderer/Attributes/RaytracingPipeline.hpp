@@ -81,6 +81,11 @@ public:
 		return m_RayGenShaderTable;
 	}
 
+	constexpr uint64_t GetShaderTableSize() const
+	{
+		return D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	}
+
 	RaytracingPipeline(const RaytracingPipelineDesc& desc);
 protected:
 	friend class Renderer;
