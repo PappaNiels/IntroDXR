@@ -17,6 +17,7 @@ public:
 	void Shutdown();
 
 	void Render();
+	virtual void Update([[maybe_unused]] float deltaTime) {};
 
 	virtual void InitializeSample() {};
 	virtual void RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7>) {};
