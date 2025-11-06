@@ -14,6 +14,8 @@
 #include "Shaders/RaytracingLighting_Release.hpp"
 #endif
 
+#include <DXR/Utils/Error.hpp>
+
 using namespace DirectX;
 
 class Lighting : public Renderer
@@ -33,6 +35,13 @@ private:
 	TLAS* m_TLAS = nullptr;
 	Mesh* m_Mesh = nullptr;
 	MeshInstance* m_MeshInstance = nullptr;
+
+	struct alignas(16) Camera
+	{
+		XMMATRIX InverseViewProjection;
+		XMVECTOR Position;
+
+	}*m_Camera = nullptr;
 };
 
 SAMPLE(Lighting)
@@ -88,7 +97,7 @@ void Lighting::InitializeSample()
 	m_Mesh->BuildBLAS();
 
 	m_MeshInstance = new MeshInstance();
-	m_MeshInstance->Mesh = m_Mesh;
+	m_MeshInstance->SetMesh(m_Mesh);
 
 	m_TLAS = new TLAS();
 	m_TLAS->AddMesh(m_MeshInstance);
@@ -106,12 +115,22 @@ void Lighting::InitializeSample()
 	desc.PayloadSize = sizeof(float) * 4;
 
 	CD3DX12_ROOT_PARAMETER params[Count] = {};
-	params[RenderTarget].InitAsConstants(1, 0);
+	params[RenderTarget].InitAsConstants(20, 0);
 	params[BVH].InitAsShaderResourceView(0);
 
 	desc.RootSignatureDesc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(params), params, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED);
 
 	m_Pipeline = new RaytracingPipeline(desc);
+
+	m_Camera = static_cast<Lighting::Camera*>(_aligned_malloc(sizeof(Lighting::Camera), alignof(Lighting::Camera)));
+	
+	if (m_Camera == nullptr)
+	{
+		FatalError("Failed to allocate memory for the camera");
+		return;
+	}
+
+	m_Camera->Position = XMVectorSet(0.0f, -1.0f, 0.0f, 1.0f);
 }
 
 
@@ -120,7 +139,9 @@ void Lighting::RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> c
 	//m_TLAS->Build(cmdList);
 
 	cmdList->SetComputeRootSignature(m_Pipeline->GetRootSignature().Get());
-	cmdList->SetComputeRoot32BitConstants(0, 1, &m_UAV, 0);
+	cmdList->SetComputeRoot32BitConstants(0, 16, &m_Camera->InverseViewProjection, 0);
+	cmdList->SetComputeRoot32BitConstants(0, 3, &m_Camera->Position, 16);
+	cmdList->SetComputeRoot32BitConstants(0, 1, &m_UAV, 19);
 	cmdList->SetComputeRootShaderResourceView(1, m_TLAS->GetVirtualAddress());
 
 	D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
@@ -142,4 +163,45 @@ void Lighting::RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> c
 
 void Lighting::Update(float deltaTime)
 {
+	const static XMVECTOR forward = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	const static XMVECTOR right = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+	const static XMVECTOR up = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+
+	XMVECTOR dT = XMVectorSet(deltaTime, deltaTime, deltaTime, 0.0f);
+
+	if (GetAsyncKeyState('W') & 0x8000)
+	{
+		m_Camera->Position += XMVectorMultiply(forward, dT);
+	}
+
+	if (GetAsyncKeyState('S') & 0x8000)
+	{
+		m_Camera->Position -= XMVectorMultiply(forward, dT);
+	}
+
+	if (GetAsyncKeyState('D') & 0x8000)
+	{
+		m_Camera->Position += XMVectorMultiply(right, dT);
+	}
+
+	if (GetAsyncKeyState('A') & 0x8000)
+	{
+		m_Camera->Position -= XMVectorMultiply(right, dT);
+	}
+
+	if (GetAsyncKeyState('Q') & 0x8000)
+	{
+		m_Camera->Position += XMVectorMultiply(up, dT);
+	}
+
+	if (GetAsyncKeyState('E') & 0x8000)
+	{
+		m_Camera->Position -= XMVectorMultiply(up, dT);
+	}
+
+	auto view = XMMatrixLookAtRH(m_Camera->Position, m_Camera->Position + forward, up);
+	auto projection = XMMatrixPerspectiveFovRH(XMConvertToRadians(55.0f), static_cast<float>(m_Width) / m_Height, 0.01f, 100.0f);
+	auto vp = XMMatrixMultiply(view, projection);
+
+	m_Camera->InverseViewProjection = XMMatrixInverse(nullptr, vp);
 }

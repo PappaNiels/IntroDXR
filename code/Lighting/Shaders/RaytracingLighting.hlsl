@@ -14,7 +14,29 @@ struct RayPayloadShadow
 
 cbuffer RenderTarget : register(b0)
 {
+    float4x4 InverseViewProjection;
+    float3 CameraPosition;
     uint UAV;
+}
+
+RayDesc GetPrimaryRay(uint2 index)
+{
+    RayDesc ray;
+    ray.Origin = CameraPosition;
+
+    float2 screenPos = float2(index) + 0.5f.xx;
+    screenPos = screenPos / (float2)DispatchRaysDimensions();
+    screenPos = mad(screenPos, 2.0f, -1.0f);
+    screenPos.y = -screenPos.y;
+
+    float4 world = mul(InverseViewProjection, float4(screenPos, 0.0f, 1.0f));
+    world.xyz /= world.w;
+
+    ray.Direction = normalize(world.xyz - CameraPosition);
+    ray.TMin = 0.01f;
+    ray.TMax = 100.0f;
+    
+    return ray;
 }
 
 [shader("raygeneration")]
@@ -22,24 +44,10 @@ void RayGenMain()
 {
     RWTexture2D<float4> RenderTarget = ResourceDescriptorHeap[UAV];
     
-    float2 lerpValues = (float2) DispatchRaysIndex() / (float2) DispatchRaysDimensions(); // 1280, 720 -> [0..1]
+    RayDesc ray = GetPrimaryRay((uint2) DispatchRaysIndex());
     
-    float3 rayDir = float3(0, 0, 1);
-    float3 origin = float3(
-        lerp(-1.0f, 1.0f, lerpValues.x),
-        lerp(-1.0f, 1.0f, lerpValues.y),
-        0.0f);
-    
-    RayDesc ray;
-    ray.Origin = origin;
-    ray.Direction = rayDir;
-    ray.TMin = 0.001;
-    ray.TMax = 10000.0;
     RayPayload payload = { float4(0, 0, 0, 0) };
     TraceRay(Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
-    
-    RayPayloadShadow s = { false };
-    
     
     RenderTarget[DispatchRaysIndex().xy] = payload.color;
 }
@@ -49,7 +57,7 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
 {
     float3 barycentrics = float3(1 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
     
-    payload.color = float4(1.0f.xxx, 1.0f.x);
+    payload.color = float4(barycentrics, 1.0f.x);
 }
 
 [shader("miss")]
