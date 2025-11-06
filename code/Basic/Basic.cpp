@@ -58,10 +58,10 @@ void Basic::RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdL
 	D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
 	dispatchDesc.HitGroupTable.StartAddress = m_Pipeline->GetHitGroupTable()->GetGPUVirtualAddress();
 	dispatchDesc.HitGroupTable.SizeInBytes = m_Pipeline->GetHitGroupTable()->GetDesc().Width;
-	dispatchDesc.HitGroupTable.StrideInBytes = dispatchDesc.HitGroupTable.SizeInBytes;
+	dispatchDesc.HitGroupTable.StrideInBytes = m_Pipeline->GetShaderTableSize();
 	dispatchDesc.MissShaderTable.StartAddress = m_Pipeline->GetMissTable()->GetGPUVirtualAddress();
 	dispatchDesc.MissShaderTable.SizeInBytes = m_Pipeline->GetMissTable()->GetDesc().Width;
-	dispatchDesc.MissShaderTable.StrideInBytes = dispatchDesc.MissShaderTable.SizeInBytes;
+	dispatchDesc.MissShaderTable.StrideInBytes = m_Pipeline->GetShaderTableSize();
 	dispatchDesc.RayGenerationShaderRecord.StartAddress = m_Pipeline->GetRayGenTable()->GetGPUVirtualAddress();
 	dispatchDesc.RayGenerationShaderRecord.SizeInBytes = m_Pipeline->GetRayGenTable()->GetDesc().Width;
 	dispatchDesc.Width = m_Width;
