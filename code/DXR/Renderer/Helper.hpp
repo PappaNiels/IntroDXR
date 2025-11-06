@@ -34,7 +34,7 @@ inline void AllocateUAVBuffer(ID3D12Device* pDevice, UINT64 bufferSize, ID3D12Re
 	}
 }
 
-inline void AllocateUploadBuffer(ID3D12Device* pDevice, void* pData, UINT64 datasize, ID3D12Resource** ppResource, const wchar_t* resourceName = nullptr)
+inline void AllocateUploadBuffer(ID3D12Device* pDevice, const void* pData, UINT64 datasize, ID3D12Resource** ppResource, const wchar_t* resourceName = nullptr)
 {
 	auto uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(datasize);
