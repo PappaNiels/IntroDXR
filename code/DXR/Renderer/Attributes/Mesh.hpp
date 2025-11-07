@@ -34,7 +34,10 @@ public:
 	}
 
 private:
+	friend class TLAS;
+
 	void SetBufferData(Microsoft::WRL::ComPtr<ID3D12Resource>& buffer, uint64_t numComponents, uint64_t componentSize, const void* data);
+	void CreateSRV(Microsoft::WRL::ComPtr<ID3D12Resource> res, uint32_t size, uint32_t numComponents, uint32_t& srv);
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_PositionBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_NormalBuffer;
@@ -49,6 +52,7 @@ private:
 
 	uint32_t m_NormalSRV = static_cast<uint32_t>(-1);
 	uint32_t m_UV0SRV = static_cast<uint32_t>(-1);
+	uint32_t m_IndexSRV = static_cast<uint32_t>(-1);
 
 	uint32_t m_IndexSize = static_cast<uint32_t>(-1);
 	D3D12_RAYTRACING_GEOMETRY_FLAGS m_Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_NONE;
@@ -84,6 +88,7 @@ inline void Mesh::SetNormalBuffer(uint64_t numNormals, const T* data)
 	ASSERT(m_VertexCount == numNormals, "There are too few/too many normals compared to the current set vertex count");
 
 	SetBufferData(m_NormalBuffer, numNormals, sizeof(T), data);
+	CreateSRV(m_NormalBuffer, sizeof(T), static_cast<uint32_t>(numNormals), m_NormalSRV);
 }
 
 template<typename T>
@@ -100,6 +105,7 @@ inline void Mesh::SetUV0Buffer(uint64_t numUV0, const T* data)
 	ASSERT(m_VertexCount == numUV0, "There are too few/too many uv0s compared to the current set vertex count");
 
 	SetBufferData(m_UV0Buffer, numUV0, sizeof(T), data);
+	CreateSRV(m_UV0Buffer, sizeof(T), static_cast<uint32_t>(numUV0), m_UV0SRV);
 }
 
 template<typename T>
@@ -111,6 +117,7 @@ inline void Mesh::SetIndexBuffer(uint64_t numIndices, const T* data)
 	m_IndexSize = sizeof(T);
 
 	SetBufferData(m_IndexBuffer, numIndices, sizeof(T), data);
+	CreateSRV(m_IndexBuffer, sizeof(T), static_cast<uint32_t>(numIndices), m_IndexSRV);
 }
 
 class MeshInstance

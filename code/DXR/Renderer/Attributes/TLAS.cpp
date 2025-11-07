@@ -3,7 +3,10 @@
 
 #include "Device.hpp"
 #include "Mesh.hpp"
+
 #include <Renderer/Helper.hpp>
+
+#include <Lighting/Shaders/Shared.hpp>
 
 void TLAS::AddMesh(MeshInstance* mesh)
 {
@@ -41,23 +44,24 @@ void TLAS::Build()
 			continue;
 		}
 
-		auto transform = mesh->GetMatrix();
-		auto m = XMMatrixTranspose(transform);
 
 		D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
 		instanceDesc.InstanceMask = 1;
 		instanceDesc.AccelerationStructure = mesh->GetBLASAddress();
 		instanceDesc.InstanceID = 0;
 		
-		/*for (int i = 0; i < 3; ++i)
+		auto transform = mesh->GetMatrix();
+		auto m = XMMatrixTranspose(transform);
+
+		for (int i = 0; i < 3; ++i)
 		{
 			instanceDesc.Transform[i][0] = DirectX::XMVectorGetX(m.r[i]);
 			instanceDesc.Transform[i][1] = DirectX::XMVectorGetY(m.r[i]);
 			instanceDesc.Transform[i][2] = DirectX::XMVectorGetZ(m.r[i]);
 			instanceDesc.Transform[i][3] = DirectX::XMVectorGetW(m.r[i]);
-		}*/
+		}
 
-		instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
+		//instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
 
 		meshes.push_back(instanceDesc);
 	}
@@ -79,6 +83,23 @@ void TLAS::Build()
 	// consider making batches rather calling the commandqueue once per mesh
 	auto fence = cmdQueue.ExecuteCommandLists({ cmdList.CommandList.Get() });
 	cmdQueue.WaitForFence(fence);
+
+	std::vector<hlsl::Mesh> meshData;
+	meshData.reserve(m_Meshes.size());
+
+	for (const auto& mesh : m_Meshes)
+	{
+		hlsl::Mesh model = {};
+
+		model.Color = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+		model.IndexIdx = mesh->m_Mesh->m_IndexSRV;
+		model.NormalIdx = mesh->m_Mesh->m_NormalSRV;
+		model.UV0Idx = mesh->m_Mesh->m_UV0SRV;
+
+		meshData.push_back(model);
+	}
+
+	AllocateUploadBuffer(device.Get(), meshData.data(), sizeof(hlsl::Mesh) * meshData.size(), &m_GeometryData);
 }
 
 void TLAS::Build(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList)
@@ -133,10 +154,22 @@ void TLAS::Build(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList)
 		}
 
 		D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
-		instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
 		instanceDesc.InstanceMask = 1;
 		instanceDesc.AccelerationStructure = mesh->GetBLASAddress();
 		instanceDesc.InstanceID = 0;
+
+		auto transform = mesh->GetMatrix();
+		auto m = XMMatrixTranspose(transform);
+
+		for (int i = 0; i < 3; ++i)
+		{
+			instanceDesc.Transform[i][0] = DirectX::XMVectorGetX(m.r[i]);
+			instanceDesc.Transform[i][1] = DirectX::XMVectorGetY(m.r[i]);
+			instanceDesc.Transform[i][2] = DirectX::XMVectorGetZ(m.r[i]);
+			instanceDesc.Transform[i][3] = DirectX::XMVectorGetW(m.r[i]);
+		}
+
+		// instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
 
 		meshes.push_back(instanceDesc);
 	}

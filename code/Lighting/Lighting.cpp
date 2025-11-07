@@ -23,6 +23,7 @@ class Lighting : public Renderer
 	enum
 	{
 		RenderTarget,
+		GeometryData,
 		BVH,
 		Count
 	};
@@ -83,6 +84,38 @@ void Lighting::InitializeSample()
 		XMFLOAT3(+0.5f, -0.5f, -0.5f)
 	};
 
+	XMFLOAT3 normals[] = {
+		XMFLOAT3(0.0f,  0.0f, +1.0f),
+		XMFLOAT3(0.0f,  0.0f, +1.0f),
+		XMFLOAT3(0.0f,  0.0f, +1.0f),
+		XMFLOAT3(0.0f,  0.0f, +1.0f),
+
+		XMFLOAT3(0.0f,  0.0f, -1.0f),
+		XMFLOAT3(0.0f,  0.0f, -1.0f),
+		XMFLOAT3(0.0f,  0.0f, -1.0f),
+		XMFLOAT3(0.0f,  0.0f, -1.0f),
+
+		XMFLOAT3(-1.0f,  0.0f,  0.0f),
+		XMFLOAT3(-1.0f,  0.0f,  0.0f),
+		XMFLOAT3(-1.0f,  0.0f,  0.0f),
+		XMFLOAT3(-1.0f,  0.0f,  0.0f),
+
+		XMFLOAT3(+1.0f,  0.0f,  0.0f),
+		XMFLOAT3(+1.0f,  0.0f,  0.0f),
+		XMFLOAT3(+1.0f,  0.0f,  0.0f),
+		XMFLOAT3(+1.0f,  0.0f,  0.0f),
+
+		XMFLOAT3(0.0f, +1.0f,  0.0f),
+		XMFLOAT3(0.0f, +1.0f,  0.0f),
+		XMFLOAT3(0.0f, +1.0f,  0.0f),
+		XMFLOAT3(0.0f, +1.0f,  0.0f),
+
+		XMFLOAT3(0.0f, -1.0f,  0.0f),
+		XMFLOAT3(0.0f, -1.0f,  0.0f),
+		XMFLOAT3(0.0f, -1.0f,  0.0f),
+		XMFLOAT3(0.0f, -1.0f,  0.0f)
+	};
+
 	uint32_t indices[] = {
 		0,  2,  1,  0,  3,  2,
 		4,  6,  5,  4,  7,  6,
@@ -94,6 +127,7 @@ void Lighting::InitializeSample()
 
 	m_Mesh = new Mesh();
 	m_Mesh->SetPositionBuffer(_countof(positions), positions);
+	m_Mesh->SetNormalBuffer(_countof(normals), normals);
 	m_Mesh->SetIndexBuffer(_countof(indices), indices);
 	m_Mesh->BuildBLAS();
 
@@ -117,14 +151,15 @@ void Lighting::InitializeSample()
 
 	CD3DX12_ROOT_PARAMETER params[Count] = {};
 	params[RenderTarget].InitAsConstants(20, 0);
-	params[BVH].InitAsShaderResourceView(0);
+	params[GeometryData].InitAsShaderResourceView(0);
+	params[BVH].InitAsShaderResourceView(1);
 
 	desc.RootSignatureDesc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(params), params, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED);
 
 	m_Pipeline = new RaytracingPipeline(desc);
 
 	m_Camera = static_cast<Lighting::Camera*>(_aligned_malloc(sizeof(Lighting::Camera), alignof(Lighting::Camera)));
-	
+
 	if (m_Camera == nullptr)
 	{
 		FatalError("Failed to allocate memory for the camera");
@@ -141,10 +176,13 @@ void Lighting::RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> c
 	//m_TLAS->Build(cmdList);
 
 	cmdList->SetComputeRootSignature(m_Pipeline->GetRootSignature().Get());
-	cmdList->SetComputeRoot32BitConstants(0, 16, &m_Camera->InverseViewProjection, 0);
-	cmdList->SetComputeRoot32BitConstants(0, 3, &m_Camera->Position, 16);
-	cmdList->SetComputeRoot32BitConstants(0, 1, &m_UAV, 19);
-	cmdList->SetComputeRootShaderResourceView(1, m_TLAS->GetVirtualAddress());
+	cmdList->SetComputeRoot32BitConstants(RenderTarget, 16, &m_Camera->InverseViewProjection, 0);
+	cmdList->SetComputeRoot32BitConstants(RenderTarget, 3, &m_Camera->Position, 16);
+	cmdList->SetComputeRoot32BitConstants(RenderTarget, 1, &m_UAV, 19);
+
+	cmdList->SetComputeRootShaderResourceView(GeometryData, m_TLAS->GetGeometryData());
+
+	cmdList->SetComputeRootShaderResourceView(BVH, m_TLAS->GetVirtualAddress());
 
 	D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
 	dispatchDesc.HitGroupTable.StartAddress = m_Pipeline->GetHitGroupTable()->GetGPUVirtualAddress();

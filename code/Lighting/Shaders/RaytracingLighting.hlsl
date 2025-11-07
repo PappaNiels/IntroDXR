@@ -1,6 +1,9 @@
 typedef BuiltInTriangleIntersectionAttributes MyAttributes;
 
-RaytracingAccelerationStructure Scene : register(t0, space0);
+#include "Shared.hpp"
+
+StructuredBuffer<hlsl::Mesh> ModelData : register(t0);
+RaytracingAccelerationStructure Scene : register(t1);
 
 struct RayPayload
 {
@@ -57,7 +60,16 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
 {
     float3 barycentrics = float3(1 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
     
-    payload.color = float4(barycentrics, 1.0f.x);
+    hlsl::Mesh model = ModelData[InstanceIndex()];
+    
+    ByteAddressBuffer indexBuffer = ResourceDescriptorHeap[model.IndexIdx]; // this needs to be flexible with 16bit and 32bit. byteaddressbuffer would work here :)
+    StructuredBuffer<float3> normalBuffer = ResourceDescriptorHeap[model.NormalIdx];
+    
+    uint3 indices = indexBuffer.Load3(PrimitiveIndex() * 3 * 4);
+    float3 normal = normalize(normalBuffer[indices.x] * barycentrics.x + normalBuffer[indices.y] * barycentrics.y + normalBuffer[indices.z] * barycentrics.z);
+    
+    payload.color = float4(mad(normal, 0.5, 0.5), 1.0f);
+    //payload.color = float4(model.Color.rgb, 1.0f);
 }
 
 [shader("miss")]

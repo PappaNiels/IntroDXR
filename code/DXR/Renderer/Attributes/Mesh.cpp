@@ -1,8 +1,11 @@
 #include "pch.hpp"
 #include "Mesh.hpp"
 
-#include <DXR/Renderer/Helper.hpp>
 #include "Device.hpp"
+#include "DescriptorHeap.hpp"
+
+#include <DXR/Renderer/Helper.hpp>
+#include <DXR/Renderer/Renderer.hpp>
 
 void Mesh::BuildBLAS()
 {
@@ -60,4 +63,27 @@ void Mesh::SetBufferData(Microsoft::WRL::ComPtr<ID3D12Resource>& buffer, uint64_
 	auto device = Device::GetDevice().GetInternalDevice();
 
 	AllocateUploadBuffer(device.Get(), data, numComponents * componentSize, &buffer);
+}
+
+void Mesh::CreateSRV(Microsoft::WRL::ComPtr<ID3D12Resource> res, uint32_t size, uint32_t numComponents, uint32_t& srv)
+{
+	if (srv != static_cast<uint32_t>(-1))
+	{
+		return;
+	}
+
+	ASSERT(m_VertexCount > 0, "Vertex count was zero");
+
+	auto* shaderHeap = Renderer::GetShaderHeap();
+	auto device = Device::GetDevice().GetInternalDevice();
+	srv = shaderHeap->GetNextIndex();
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC desc = {};
+	desc.Format = DXGI_FORMAT_UNKNOWN;
+	desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	desc.Buffer.StructureByteStride = size;
+	desc.Buffer.NumElements = numComponents;
+
+	device->CreateShaderResourceView(res.Get(), &desc, shaderHeap->GetCPUHandle(srv));
 }

@@ -8,6 +8,8 @@
 class Renderer
 {
 public:
+	static class DescriptorHeap* GetShaderHeap();
+
 	Renderer();
 	Renderer(uint32_t width, uint32_t height);
 	~Renderer();

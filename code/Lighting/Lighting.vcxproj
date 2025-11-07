@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.hpp" />
+    <ClInclude Include="Shaders\Shared.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DXR\DXR.vcxproj">

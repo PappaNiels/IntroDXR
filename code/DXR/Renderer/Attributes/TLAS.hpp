@@ -19,8 +19,14 @@ public:
 		return m_TLAS->GetGPUVirtualAddress();
 	}
 
+	D3D12_GPU_VIRTUAL_ADDRESS GetGeometryData() const
+	{
+		return m_GeometryData->GetGPUVirtualAddress();
+	}
+
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_TLAS;
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_GeometryData;
 
 	std::vector<class MeshInstance*> m_Meshes;
 };

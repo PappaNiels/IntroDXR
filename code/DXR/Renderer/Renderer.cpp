@@ -19,6 +19,11 @@ Renderer* g_Renderer = nullptr;
 
 using namespace DirectX;
 
+DescriptorHeap* Renderer::GetShaderHeap()
+{
+	return g_Renderer->m_ShaderHeap;
+}
+
 Renderer::Renderer()
 	: m_Device(nullptr)
 	, m_HWND(nullptr)
@@ -61,9 +66,9 @@ void Renderer::Initialize()
 	CreateRenderTarget();
 	CreateCommandLists();
 
-	InitializeSample();
-
 	g_Renderer = this;
+
+	InitializeSample();
 }
 
 void Renderer::Shutdown()
