@@ -15,7 +15,7 @@ If you want to read my posts, have a look at the articles:
 - A Windows machine
 - Visual Studio 2022:
     - Desktop Development with C++ extension:
-        - Windows SDK 10.0.22621.0 or higher
+        - Windows SDK 10.0 or higher
         - HLSL Tools (?)
 - A GPU with D3D12 support, shader model 6.6 support, and ray tracing capabilities.
 - Git
