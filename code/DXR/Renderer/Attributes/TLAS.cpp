@@ -169,8 +169,6 @@ void TLAS::Build(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList)
 			instanceDesc.Transform[i][3] = DirectX::XMVectorGetW(m.r[i]);
 		}
 
-		// instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
-
 		meshes.push_back(instanceDesc);
 	}
 

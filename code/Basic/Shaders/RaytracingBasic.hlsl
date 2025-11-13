@@ -2,33 +2,28 @@
 
 typedef BuiltInTriangleIntersectionAttributes MyAttributes;
 
-RaytracingAccelerationStructure Scene : register(t0, space0);
 
 struct RayPayload
 {
-    float4 color;
+    float4 Color;
 };
 
-struct RayPayloadShadow
-{
-    bool IsOccluded;
-};
+RaytracingAccelerationStructure Scene : register(t0);
 
 cbuffer RenderTarget : register(b0)
 {
-    uint UAV;
+    uint g_UAV;
 }
 
 float3 LinearToSRGB(float3 color)
 {
-    // Approximately pow(color, 1.0 / 2.2)
-    return color < 0.0031308 ? 12.92 * color : 1.055 * pow(abs(color), 1.0 / 2.4) - 0.055;
+    return pow(color, 1.0 / 2.2);
 }
 
 [shader("raygeneration")]
 void RayGenMain()
 {
-    RWTexture2D<float4> RenderTarget = ResourceDescriptorHeap[UAV];
+    RWTexture2D<float4> RenderTarget = ResourceDescriptorHeap[g_UAV];
     
     float2 lerpValues = (float2) DispatchRaysIndex() / (float2) DispatchRaysDimensions(); // 1280, 720 -> [0..1]
     
@@ -46,10 +41,7 @@ void RayGenMain()
     RayPayload payload = { float4(0, 0, 0, 0) };
     TraceRay(Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
     
-    RayPayloadShadow s = { false };
-    
-    
-    RenderTarget[DispatchRaysIndex().xy] = payload.color;
+    RenderTarget[DispatchRaysIndex().xy] = payload.Color;
 }
 
 [shader("closesthit")]
@@ -57,11 +49,11 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
 {
     float3 barycentrics = float3(1 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
     
-    payload.color = float4(LinearToSRGB(barycentrics), 1.0f.x);
+    payload.Color = float4(LinearToSRGB(barycentrics), 1.0f.x);
 }
 
 [shader("miss")]
 void MissMain(inout RayPayload payload)
 {
-    payload.color = float4(1.0f, 1.0f, 0.0f, 1.0f);
+    payload.Color = float4(1.0f, 1.0f, 0.0f, 1.0f);
 }
