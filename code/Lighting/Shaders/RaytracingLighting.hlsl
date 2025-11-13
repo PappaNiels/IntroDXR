@@ -67,9 +67,9 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
     float3 normal = normalize(normalBuffer[indices.x] * barycentrics.x + normalBuffer[indices.y] * barycentrics.y + normalBuffer[indices.z] * barycentrics.z);
     
     float nDotl = dot(normal, -normalize(g_Light.Direction));
-    float3 radiance = nDotl * g_Light.Intensity * g_Light.Color;
+    float3 radiance = max(nDotl, 0.0f) * g_Light.Intensity * g_Light.Color;
     
-    payload.Color = float4(mesh.Color.rgb * radiance, 1.0f);
+    payload.Color = float4(mesh.Color.rgb * radiance + mesh.Color.rgb * 0.1f, 1.0f);
 }
 
 [shader("miss")]
