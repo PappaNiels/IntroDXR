@@ -64,8 +64,10 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
     
     uint3 indices = indexBuffer.Load3(PrimitiveIndex() * 3 * 4);
     
+    // Interpolate the normal from the three vertices
     float3 normal = normalize(normalBuffer[indices.x] * barycentrics.x + normalBuffer[indices.y] * barycentrics.y + normalBuffer[indices.z] * barycentrics.z);
     
+    // We just shade the cube and do not cast a shadow ray. Since we dont have anything else in the scene, that would be stupid...
     float nDotl = dot(normal, -normalize(g_Light.Direction));
     float3 radiance = max(nDotl, 0.0f) * g_Light.Intensity * g_Light.Color;
     
