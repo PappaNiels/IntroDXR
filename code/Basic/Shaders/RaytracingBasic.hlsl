@@ -1,7 +1,4 @@
-//#include "RaytracingCommon.hlsli"
-
 typedef BuiltInTriangleIntersectionAttributes MyAttributes;
-
 
 struct RayPayload
 {
