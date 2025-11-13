@@ -8,7 +8,7 @@ struct RayPayload
 };
 
 StructuredBuffer<hlsl::Mesh> g_MeshData : register(t0);
-RaytracingAccelerationStructure Scene : register(t1);
+RaytracingAccelerationStructure g_Scene : register(t1);
 
 cbuffer Core : register(b0)
 {
@@ -47,7 +47,7 @@ void RayGenMain()
     RayDesc ray = GetPrimaryRay((uint2) DispatchRaysIndex());
     
     RayPayload payload = { float4(0, 0, 0, 0) };
-    TraceRay(Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
+    TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
     
     RenderTarget[DispatchRaysIndex().xy] = payload.Color;
 }
@@ -57,16 +57,19 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
 {
     float3 barycentrics = float3(1 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
     
-    hlsl::Mesh model = g_MeshData[InstanceIndex()];
+    hlsl::Mesh mesh = g_MeshData[InstanceIndex()];
     
-    ByteAddressBuffer indexBuffer = ResourceDescriptorHeap[model.IndexIdx]; // this needs to be flexible with 16bit and 32bit. byteaddressbuffer would work here :)
-    StructuredBuffer<float3> normalBuffer = ResourceDescriptorHeap[model.NormalIdx];
+    ByteAddressBuffer indexBuffer = ResourceDescriptorHeap[mesh.IndexIdx]; // this needs to be flexible with 16bit and 32bit. byteaddressbuffer would work here :)
+    StructuredBuffer<float3> normalBuffer = ResourceDescriptorHeap[mesh.NormalIdx];
     
     uint3 indices = indexBuffer.Load3(PrimitiveIndex() * 3 * 4);
     
     float3 normal = normalize(normalBuffer[indices.x] * barycentrics.x + normalBuffer[indices.y] * barycentrics.y + normalBuffer[indices.z] * barycentrics.z);
     
-    payload.Color = float4(mad(normal, 0.5, 0.5), 1.0f);
+    float nDotl = dot(normal, -normalize(g_Light.Direction));
+    float3 radiance = nDotl * g_Light.Intensity * g_Light.Color;
+    
+    payload.Color = float4(mesh.Color.rgb * radiance, 1.0f);
 }
 
 [shader("miss")]

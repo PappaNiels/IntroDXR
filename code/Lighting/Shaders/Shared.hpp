@@ -29,4 +29,11 @@ namespace hlsl
 		uint NormalIdx;
 		uint UV0Idx;
 	};
+
+	struct DirectionalLight
+	{
+		float3 Direction;
+		float Intensity;
+		float3 Color;
+	};
 }

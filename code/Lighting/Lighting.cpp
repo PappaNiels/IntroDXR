@@ -16,13 +16,16 @@
 
 #include <DXR/Utils/Error.hpp>
 
+#include <Shaders/Shared.hpp>
+
 using namespace DirectX;
 
 class Lighting : public Renderer
 {
 	enum
 	{
-		RenderTarget,
+		Core,
+		Light,
 		GeometryData,
 		BVH,
 		Count
@@ -44,6 +47,8 @@ private:
 		XMVECTOR Rotation;
 
 	}*m_Camera = nullptr;
+
+	hlsl::DirectionalLight m_DirectionalLight;
 };
 
 SAMPLE(Lighting)
@@ -150,7 +155,8 @@ void Lighting::InitializeSample()
 	desc.PayloadSize = sizeof(float) * 4;
 
 	CD3DX12_ROOT_PARAMETER params[Count] = {};
-	params[RenderTarget].InitAsConstants(20, 0);
+	params[Core].InitAsConstants(20, 0);
+	params[Light].InitAsConstants(sizeof(hlsl::DirectionalLight) / sizeof(uint32_t), 1);
 	params[GeometryData].InitAsShaderResourceView(0);
 	params[BVH].InitAsShaderResourceView(1);
 
@@ -168,6 +174,10 @@ void Lighting::InitializeSample()
 
 	m_Camera->Position = XMVectorSet(0.0f, -1.0f, 0.0f, 1.0f);
 	m_Camera->Rotation = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+
+	m_DirectionalLight.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	m_DirectionalLight.Direction = XMFLOAT3(0.3f, 0.5f, -0.2f);
+	m_DirectionalLight.Intensity = 1.0f;
 }
 
 
@@ -176,9 +186,12 @@ void Lighting::RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> c
 	//m_TLAS->Build(cmdList);
 
 	cmdList->SetComputeRootSignature(m_Pipeline->GetRootSignature().Get());
-	cmdList->SetComputeRoot32BitConstants(RenderTarget, 16, &m_Camera->InverseViewProjection, 0);
-	cmdList->SetComputeRoot32BitConstants(RenderTarget, 3, &m_Camera->Position, 16);
-	cmdList->SetComputeRoot32BitConstants(RenderTarget, 1, &m_UAV, 19);
+
+	cmdList->SetComputeRoot32BitConstants(Core, 16, &m_Camera->InverseViewProjection, 0);
+	cmdList->SetComputeRoot32BitConstants(Core, 3, &m_Camera->Position, 16);
+	cmdList->SetComputeRoot32BitConstants(Core, 1, &m_UAV, 19);
+
+	cmdList->SetComputeRoot32BitConstants(Light, sizeof(hlsl::DirectionalLight) / sizeof(uint32_t), &m_DirectionalLight, 0);
 
 	cmdList->SetComputeRootShaderResourceView(GeometryData, m_TLAS->GetGeometryData());
 
