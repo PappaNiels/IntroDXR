@@ -6,7 +6,7 @@
 
 #include <Renderer/Helper.hpp>
 
-#include <Lighting/Shaders/Shared.hpp>
+#include <2_Lighting/Shaders/Shared.hpp>
 
 void TLAS::AddMesh(MeshInstance* mesh)
 {
