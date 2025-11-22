@@ -68,8 +68,6 @@ private:
 
 SAMPLE(Lighting)
 
-std::wstring Renderer::ms_SampleName = L"Lighting";
-
 void Lighting::InitializeSample()
 {
 	XMFLOAT3 positions[] = {

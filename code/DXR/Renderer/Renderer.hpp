@@ -3,7 +3,7 @@
 #include <wrl/client.h>
 #include <dxgi1_6.h>
 
-#define SAMPLE(x) Renderer* CreateSample() { return new x();}
+#define SAMPLE(x) Renderer* CreateSample() { return new x();} std::wstring Renderer::ms_SampleName = L#x;
 
 class Renderer
 {

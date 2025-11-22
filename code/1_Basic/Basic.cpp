@@ -36,8 +36,6 @@ private:
 
 SAMPLE(Basic);
 
-std::wstring Renderer::ms_SampleName = L"Basic";
-
 void Basic::InitializeSample()
 {
 	XMFLOAT3 positions[] =
