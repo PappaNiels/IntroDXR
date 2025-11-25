@@ -24,6 +24,8 @@ To see the full cube, you can move the camera around with the following controls
 - `Down arrow` : Rotate down.
 - `Right arrow` : Rotate right.
 
+- `Esc` : Quit sample.
+
 ### What can be learned from this sample?
 - Simple shading in the ray tracer.
 - Getting vertex data in the closest hit shader.
