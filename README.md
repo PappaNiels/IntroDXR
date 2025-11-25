@@ -24,7 +24,7 @@ If you want to read my posts, have a look at the articles:
 To download the code, clone the repo by using `git clone https://github.com/PappaNiels/IntroDXR.git`. Then to get the submodules, use `git submodule update --init`, to make sure you have all the dependencies.
 
 ### Building the code
-To build the code, open the visual studio solution. Select the sample you want to view, by setting the start project to the sample project. Press `F5` to build and run with the debugger attached, or press `ctrl + b` on the sample project to just build the executable. No further steps are needed to run the sample.
+To build the code, first run the `SetupDirectories.bat` scripts to setup the directories and the symbolic links. Open the visual studio solution and select the sample you want to view, by setting the start project to the sample project. Press `F5` to build and run with the debugger attached, or press `ctrl + b` on the sample project to just build the executable. As last, you need to set the working directory to `$(OutDir)` in the project settings under `Debugging`. This way, the resources will be available directly from the executable and via running it through visual studio.
 
 ## How to use
 Soon!
