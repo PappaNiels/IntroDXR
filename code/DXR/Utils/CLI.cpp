@@ -13,8 +13,6 @@ void ParseCLI()
 {
 	std::string cli = GetCommandLineA();
 	
-	std::transform(cli.begin(), cli.end(), cli.begin(), ::tolower);
-
 	if (cli.find("-console") != cli.npos)
 	{
 		g_CLI.Console = 1;

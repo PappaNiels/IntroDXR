@@ -135,7 +135,7 @@ void Device::CheckFeatureSupport()
 	}
 }
 
-void Device::Debug(D3D12_MESSAGE_CATEGORY Category, D3D12_MESSAGE_SEVERITY Severity, D3D12_MESSAGE_ID ID, LPCSTR pDescription, void* pContext)
+void Device::Debug(UNUSED D3D12_MESSAGE_CATEGORY Category, UNUSED D3D12_MESSAGE_SEVERITY Severity, UNUSED D3D12_MESSAGE_ID ID, LPCSTR pDescription, UNUSED void* pContext)
 {
 	std::string str = "[D3D12] ";
 

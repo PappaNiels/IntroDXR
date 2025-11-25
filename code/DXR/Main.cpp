@@ -31,7 +31,7 @@ void CreateConsole()
 	SetConsoleTitle(TEXT("Intro DirectX Raytracing | Debug Console"));
 }
 
-int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR cmdLine, INT cmdShow)
+int CALLBACK WinMain(UNUSED HINSTANCE instance, HINSTANCE, UNUSED LPSTR cmdLine, UNUSED INT cmdShow)
 {
 	ParseCLI();
 
