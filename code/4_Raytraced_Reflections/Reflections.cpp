@@ -5,6 +5,7 @@
 #include <DXR/Renderer/Attributes/TLAS.hpp>
 #include <DXR/Renderer/Attributes/Mesh.hpp>
 #include <DXR/Renderer/Attributes/RaytracingPipeline.hpp>
+#include <DXR/Renderer/Attributes/Texture.hpp>
 
 #include <DirectXMath.h>
 
@@ -39,6 +40,8 @@ private:
 	TLAS* m_TLAS = nullptr;
 	Mesh* m_Mesh = nullptr;
 	MeshInstance* m_MeshInstance[2] = { nullptr, nullptr };
+
+	Texture* m_SkyDome = nullptr;
 
 	struct alignas(16) Camera
 	{
@@ -169,18 +172,20 @@ void Reflections::InitializeSample()
 	desc.MissShaders.emplace_back(L"MissMainShadow");
 	desc.ShaderCode.pShaderBytecode = g_RaytracingReflections;
 	desc.ShaderCode.BytecodeLength = sizeof(g_RaytracingReflections);
-	desc.RecursionDepth = 2;
+	desc.RecursionDepth = MAX_RECURSION;
 
 	desc.AttributeSize = sizeof(float) * 2;
-	desc.PayloadSize = sizeof(float) * 4;
+	desc.PayloadSize = sizeof(float) * 4 + sizeof(uint);
 
 	CD3DX12_ROOT_PARAMETER params[Count] = {};
-	params[Core].InitAsConstants(20, 0);
+	params[Core].InitAsConstants(21, 0);
 	params[Light].InitAsConstants(sizeof(hlsl::DirectionalLight) / sizeof(uint32_t), 1);
 	params[GeometryData].InitAsShaderResourceView(0);
 	params[BVH].InitAsShaderResourceView(1);
 
-	desc.RootSignatureDesc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(params), params, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED);
+	CD3DX12_STATIC_SAMPLER_DESC sampler(0, D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT);
+
+	desc.RootSignatureDesc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(params), params, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED);
 
 	m_Pipeline = new RaytracingPipeline(desc);
 
@@ -199,18 +204,19 @@ void Reflections::InitializeSample()
 	m_DirectionalLight.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	m_DirectionalLight.Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
 	m_DirectionalLight.Intensity = 1.0f;
+
+	m_SkyDome = new Texture("../assets/skydome/golden_gate_hills_2k.hdr");
 }
 
 
 void Reflections::RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList)
 {
-	//m_TLAS->Build(cmdList);
-
 	cmdList->SetComputeRootSignature(m_Pipeline->GetRootSignature().Get());
 
 	cmdList->SetComputeRoot32BitConstants(Core, 16, &m_Camera->InverseViewProjection, 0);
 	cmdList->SetComputeRoot32BitConstants(Core, 3, &m_Camera->Position, 16);
-	cmdList->SetComputeRoot32BitConstants(Core, 1, &m_UAV, 19);
+	cmdList->SetComputeRoot32BitConstant(Core, m_UAV, 19);
+	cmdList->SetComputeRoot32BitConstant(Core, m_SkyDome->GetSRV(), 20);
 
 	cmdList->SetComputeRoot32BitConstants(Light, sizeof(hlsl::DirectionalLight) / sizeof(uint32_t), &m_DirectionalLight, 0);
 

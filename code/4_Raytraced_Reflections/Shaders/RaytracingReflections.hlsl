@@ -5,6 +5,7 @@ typedef BuiltInTriangleIntersectionAttributes MyAttributes;
 struct RayPayload
 {
     float4 Color;
+    uint Depth;
 };
 
 struct RayPayloadShadow
@@ -20,9 +21,16 @@ cbuffer Core : register(b0)
     float4x4 g_InverseViewProjection;
     float3 g_CameraPosition;
     uint g_UAV;
+    uint g_SkySRV;
 }
 
 ConstantBuffer<hlsl::DirectionalLight> g_Light : register(b1);
+
+SamplerState g_LinearSampler : register(s0);
+
+static const float INVPI = 0.31830988618379067153777f;
+static const float INV2PI = 0.15915494309189533576888f;
+static const float PI = 3.14159265;
 
 RayDesc GetPrimaryRay(uint2 index)
 {
@@ -51,7 +59,7 @@ void RayGenMain()
     
     RayDesc ray = GetPrimaryRay((uint2) DispatchRaysIndex());
     
-    RayPayload payload = { float4(0, 0, 0, 0) };
+    RayPayload payload = { float4(0, 0, 0, 0), 0 };
     TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
     
     RenderTarget[DispatchRaysIndex().xy] = payload.Color;
@@ -60,6 +68,12 @@ void RayGenMain()
 [shader("closesthit")]
 void ClosestMain(inout RayPayload payload, in MyAttributes attr)
 {
+    if (payload.Depth + 1 >= MAX_RECURSION)
+    {
+        payload.Color = float4(0.0f.xxx, 1.0f);
+        return;
+    }
+    
     float3 barycentrics = float3(1 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
     
     hlsl::Mesh mesh = g_MeshData[InstanceIndex()];
@@ -78,23 +92,46 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
     
     RayPayloadShadow shadowPayload = { true };
     
-    RayDesc ray;
-    ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-    ray.Direction = -normalize(g_Light.Direction);
-    ray.TMin = 0.01f;
-    ray.TMax = 1000.0f;
+    RayDesc shadowRay;
+    shadowRay.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+    shadowRay.Direction = -normalize(g_Light.Direction);
+    shadowRay.TMin = 0.01f;
+    shadowRay.TMax = 1000.0f;
     
-    TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_SKIP_CLOSEST_HIT_SHADER, ~0, 0, 1, 1, ray, shadowPayload);
+    TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_SKIP_CLOSEST_HIT_SHADER, ~0, 0, 1, 1, shadowRay, shadowPayload);
     
     float shadowValue = shadowPayload.IsOccluded ? 0.0f : 1.0f;
     
-    payload.Color = float4(mesh.Color.rgb * radiance * shadowValue + mesh.Color.rgb * 0.35f, 1.0f);
+    RayPayload radiancePayload = { float4(0.0f.xxx, 1.0f), ++payload.Depth };
+    
+    RayDesc ray;
+    ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+    ray.Direction = reflect(WorldRayDirection(), normal);
+    ray.TMin = 0.01f;
+    ray.TMax = 1000.0f;
+    
+    TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_FORCE_OPAQUE_, ~0, 0, 1, 0, ray, radiancePayload);
+    
+    radiance = mesh.Color.rgb * radiance * 0.65f + radiancePayload.Color.rgb * 0.35f;
+    
+    payload.Color = float4(radiance * shadowValue + mesh.Color.rgb * 0.35f, 1.0f);
 }
 
 [shader("miss")]
 void MissMain(inout RayPayload payload)
 {
-    payload.Color = float4(1.0f, 1.0f, 0.0f, 1.0f);
+    Texture2D<float4> sky = ResourceDescriptorHeap[g_SkySRV];
+    
+    // Calculate the uvs 
+    float3 rayDirection = WorldRayDirection();
+    
+    float phi = atan2(rayDirection.y, rayDirection.x) + PI;
+    float theta = acos(-rayDirection.z);
+    
+    float u = phi / (2 * PI);
+    float v = 1.0 - (theta / PI);
+    
+    payload.Color = float4(sky.SampleLevel(g_LinearSampler, float2(u, v), 0).rgb, 1.0f);
 }
 
 [shader("miss")]
