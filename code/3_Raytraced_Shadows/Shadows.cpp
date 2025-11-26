@@ -1,10 +1,10 @@
 #include "pch.hpp"
 
-#include <DXR/Renderer/Renderer.hpp>
+#include <DXRCore/Renderer/Renderer.hpp>
 
-#include <DXR/Renderer/Attributes/TLAS.hpp>
-#include <DXR/Renderer/Attributes/Mesh.hpp>
-#include <DXR/Renderer/Attributes/RaytracingPipeline.hpp>
+#include <DXRCore/Renderer/Attributes/TLAS.hpp>
+#include <DXRCore/Renderer/Attributes/Mesh.hpp>
+#include <DXRCore/Renderer/Attributes/RaytracingPipeline.hpp>
 
 #include <DirectXMath.h>
 
@@ -14,7 +14,7 @@
 #include "Shaders/RaytracingShadows_Release.hpp"
 #endif
 
-#include <DXR/Utils/Error.hpp>
+#include <DXRCore/Utils/Error.hpp>
 
 #include <Shaders/Shared.hpp>
 

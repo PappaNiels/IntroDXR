@@ -4,8 +4,8 @@
 #include "Device.hpp"
 #include "DescriptorHeap.hpp"
 
-#include <DXR/Renderer/Helper.hpp>
-#include <DXR/Renderer/Renderer.hpp>
+#include <DXRCore/Renderer/Helper.hpp>
+#include <DXRCore/Renderer/Renderer.hpp>
 
 void Mesh::BuildBLAS()
 {

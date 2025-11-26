@@ -1,10 +1,10 @@
 #include "pch.hpp"
 
-#include <DXR/Renderer/Renderer.hpp>
+#include <DXRCore/Renderer/Renderer.hpp>
 
-#include <DXR/Renderer/Attributes/RaytracingPipeline.hpp>
-#include <DXR/Renderer/Attributes/Mesh.hpp>
-#include <DXR/Renderer/Attributes/TLAS.hpp>
+#include <DXRCore/Renderer/Attributes/RaytracingPipeline.hpp>
+#include <DXRCore/Renderer/Attributes/Mesh.hpp>
+#include <DXRCore/Renderer/Attributes/TLAS.hpp>
 
 #if defined _DEBUG
 #include "Shaders/RaytracingBasic_Debug.hpp"

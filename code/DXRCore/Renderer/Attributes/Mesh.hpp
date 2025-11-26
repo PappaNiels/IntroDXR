@@ -7,7 +7,7 @@
 
 #include <DirectXMath.h>
 
-#include <DXR/Utils/Assert.hpp>
+#include <DXRCore/Utils/Assert.hpp>
 
 class Mesh
 {
