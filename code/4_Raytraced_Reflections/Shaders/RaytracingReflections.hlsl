@@ -110,7 +110,7 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
     ray.TMin = 0.01f;
     ray.TMax = 1000.0f;
     
-    TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_FORCE_OPAQUE_, ~0, 0, 1, 0, ray, radiancePayload);
+    TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, radiancePayload);
     
     radiance = mesh.Color.rgb * radiance * 0.65f + radiancePayload.Color.rgb * 0.35f;
     
