@@ -1,3 +1,6 @@
 [submodule "vendor/DirectXMath"]
 	path = vendor/DirectXMath
 	url = https://github.com/microsoft/DirectXMath.git
+[submodule "vendor/stb"]
+	path = vendor/stb
+	url = https://github.com/nothings/stb
