@@ -158,7 +158,7 @@ void Lighting::InitializeSample()
 
 	RaytracingPipelineDesc desc = {};
 	desc.RayGenEntry.EntryName = L"RayGenMain";
-	desc.HitGroups.emplace_back(L"ClosestMain", L"HitGroup", D3D12_HIT_GROUP_TYPE_TRIANGLES);
+	desc.HitGroups.emplace_back(L"ClosestMain", L"", L"", L"HitGroup", D3D12_HIT_GROUP_TYPE_TRIANGLES);
 	desc.MissShaders.emplace_back(L"MissMain");
 	desc.ShaderCode.pShaderBytecode = g_RaytracingLighting;
 	desc.ShaderCode.BytecodeLength = sizeof(g_RaytracingLighting);

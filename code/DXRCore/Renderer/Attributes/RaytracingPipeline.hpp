@@ -10,14 +10,18 @@
 
 struct HitGroupEntry
 {
-	HitGroupEntry(std::wstring_view entry, std::wstring_view hitGroup, D3D12_HIT_GROUP_TYPE type)
-		: ShaderEntry(entry)
+	HitGroupEntry(std::wstring_view closestHit, std::wstring_view anyHit, std::wstring_view intersection, std::wstring_view hitGroup, D3D12_HIT_GROUP_TYPE type)
+		: ClosestHit(closestHit)
+		, AnyHit(anyHit)
+		, Intersection(intersection)
 		, HitGroup(hitGroup)
 		, Type(type)
 	{
 	}
 
-	std::wstring_view ShaderEntry;
+	std::wstring_view ClosestHit;
+	std::wstring_view AnyHit;
+	std::wstring_view Intersection;
 	std::wstring_view HitGroup;
 	D3D12_HIT_GROUP_TYPE Type;
 };

@@ -197,9 +197,21 @@ void RaytracingPipeline::CreatePipeline(const RaytracingPipelineDesc& desc)
 	{
 		auto* hitGroup = pipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
 		
-		if (!hit.ShaderEntry.empty())
+		if (!hit.ClosestHit.empty())
 		{
-			hitGroup->SetClosestHitShaderImport(hit.ShaderEntry.data());
+			hitGroup->SetClosestHitShaderImport(hit.ClosestHit.data());
+		}
+
+		if (!hit.AnyHit.empty())
+		{
+			hitGroup->SetAnyHitShaderImport(hit.AnyHit.data());
+		}
+
+		if (!hit.Intersection.empty())
+		{
+			ASSERT(hit.Type == D3D12_HIT_GROUP_TYPE_PROCEDURAL_PRIMITIVE, "Procedural primitives must be used with the intersection shader");
+
+			hitGroup->SetIntersectionShaderImport(hit.Intersection.data());
 		}
 
 		hitGroup->SetHitGroupExport(hit.HitGroup.data());
