@@ -154,10 +154,14 @@ void Reflections::InitializeSample()
 
 	m_MeshInstance[0] = new MeshInstance();
 	m_MeshInstance[0]->SetMesh(m_Mesh);
-	m_MeshInstance[0]->Translation = XMFLOAT3(0.0f, 0.0f, 3.0f);
+	m_MeshInstance[0]->SetColor({0.5f, 1.0f, 0.5f, 1.0f});
+	m_MeshInstance[0]->SetReflectanceCoefficient(0.0f);
+	m_MeshInstance[0]->Translation = XMFLOAT3(0.0f, 0.0f, 1.5f);
 
 	m_MeshInstance[1] = new MeshInstance();
 	m_MeshInstance[1]->SetMesh(m_Mesh);
+	m_MeshInstance[1]->SetColor({ 1.0f, 0.0f, 1.0f, 1.0f });
+	m_MeshInstance[1]->SetReflectanceCoefficient(0.1f);
 	m_MeshInstance[1]->Scale = XMFLOAT3(5.0f, 5.0f, 0.5f);
 
 	m_TLAS = new TLAS();
@@ -202,7 +206,7 @@ void Reflections::InitializeSample()
 	m_Camera->Pitch = -30.0f;
 
 	m_DirectionalLight.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	m_DirectionalLight.Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	m_DirectionalLight.Direction = XMFLOAT3(-0.25f, -0.25f, -0.5f);
 	m_DirectionalLight.Intensity = 1.0f;
 
 	m_SkyDome = new Texture("../assets/skydome/golden_gate_hills_2k.hdr");

@@ -13,7 +13,7 @@ struct RayPayloadShadow
     bool IsOccluded;
 };
 
-StructuredBuffer<hlsl::Mesh> g_MeshData : register(t0);
+StructuredBuffer<hlsl:: Mesh> g_MeshData : register(t0);
 RaytracingAccelerationStructure g_Scene : register(t1);
 
 cbuffer Core : register(b0)
@@ -24,7 +24,7 @@ cbuffer Core : register(b0)
     uint g_SkySRV;
 }
 
-ConstantBuffer<hlsl::DirectionalLight> g_Light : register(b1);
+ConstantBuffer<hlsl:: DirectionalLight> g_Light : register(b1);
 
 SamplerState g_LinearSampler : register(s0);
 
@@ -38,7 +38,7 @@ RayDesc GetPrimaryRay(uint2 index)
     ray.Origin = g_CameraPosition;
 
     float2 screenPos = float2(index) + 0.5f.xx;
-    screenPos = screenPos / (float2)DispatchRaysDimensions();
+    screenPos = screenPos / (float2) DispatchRaysDimensions();
     screenPos = mad(screenPos, 2.0f, -1.0f);
     screenPos.y = -screenPos.y;
 
@@ -98,21 +98,31 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
     shadowRay.TMin = 0.01f;
     shadowRay.TMax = 1000.0f;
     
-    TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_SKIP_CLOSEST_HIT_SHADER, ~0, 0, 1, 1, shadowRay, shadowPayload);
+    TraceRay(g_Scene, RAY_FLAG_CULL_FRONT_FACING_TRIANGLES | RAY_FLAG_SKIP_CLOSEST_HIT_SHADER, ~0, 0, 1, 1, shadowRay, shadowPayload);
     
     float shadowValue = shadowPayload.IsOccluded ? 0.0f : 1.0f;
     
     RayPayload radiancePayload = { float4(0.0f.xxx, 1.0f), ++payload.Depth };
     
-    RayDesc ray;
-    ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-    ray.Direction = reflect(WorldRayDirection(), normal);
-    ray.TMin = 0.01f;
-    ray.TMax = 1000.0f;
+    if (mesh.Reflectance > 0.001)
+    {
+        // Note: We use the same closest hit and miss shaders as the regular pipeline
+        RayDesc ray;
+        ray.Origin = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+        ray.Direction = reflect(WorldRayDirection(), normal);
+        ray.TMin = 0.01f;
+        ray.TMax = 1000.0f;
     
-    TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, radiancePayload);
+        TraceRay(g_Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, radiancePayload);
+        
+        float cosi = saturate(dot(-WorldRayDirection(), normal));
+        float3 f0 = mesh.Color.rgb + (1 - mesh.Color.rgb) * pow(1 - cosi, 5);
+        
+        radiancePayload.Color.rgb *= mesh.Reflectance * f0;
+    }
     
-    radiance = mesh.Color.rgb * radiance * 0.65f + radiancePayload.Color.rgb * 0.35f;
+    
+    radiance = mesh.Color.rgb * radiance * 0.65f + radiancePayload.Color.rgb ;
     
     payload.Color = float4(radiance * shadowValue + mesh.Color.rgb * 0.35f, 1.0f);
 }
