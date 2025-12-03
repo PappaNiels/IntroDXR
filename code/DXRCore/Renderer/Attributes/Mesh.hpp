@@ -155,6 +155,16 @@ public:
 		IsDirty = true;
 	}
 
+	void SetReflectanceCoefficient(float reflectance)
+	{
+		m_Reflectance = reflectance;
+	}
+
+	void SetColor(const DirectX::XMFLOAT4& color)
+	{
+		m_Color = color;
+	}
+
 	DirectX::XMMATRIX GetMatrix() const
 	{
 		auto translation = DirectX::XMMatrixTranslation(m_Translation.x, m_Translation.y, m_Translation.z);
@@ -177,6 +187,9 @@ private:
 	DirectX::XMFLOAT4 m_Rotation;
 	DirectX::XMFLOAT3 m_Translation;
 	DirectX::XMFLOAT3 m_Scale{ 1.0f, 1.0f, 1.0f };
+
+	DirectX::XMFLOAT4 m_Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+	float m_Reflectance = 0.0f;
 
 	bool IsDirty = true;
 };

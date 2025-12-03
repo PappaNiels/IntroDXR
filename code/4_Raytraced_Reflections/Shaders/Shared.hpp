@@ -29,6 +29,7 @@ namespace hlsl
 	struct Mesh
 	{
 		float4 Color;
+		float Reflectance;
 
 		uint IndexIdx;
 		uint NormalIdx;

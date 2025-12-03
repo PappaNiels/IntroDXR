@@ -91,7 +91,8 @@ void TLAS::Build()
 	{
 		hlsl::Mesh model = {};
 
-		model.Color = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+		model.Color = mesh->m_Color;
+		model.Reflectance = mesh->m_Reflectance;
 		model.IndexIdx = mesh->m_Mesh->m_IndexSRV;
 		model.NormalIdx = mesh->m_Mesh->m_NormalSRV;
 		model.UV0Idx = mesh->m_Mesh->m_UV0SRV;
