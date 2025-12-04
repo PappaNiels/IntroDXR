@@ -151,10 +151,12 @@ void Shadows::InitializeSample()
 
 	m_MeshInstance[0] = new MeshInstance();
 	m_MeshInstance[0]->SetMesh(m_Mesh);
-	m_MeshInstance[0]->Translation = XMFLOAT3(0.0f, 0.0f, 3.0f);
+	m_MeshInstance[0]->SetColor(XMFLOAT4(0.25f, 0.5f, 1.0f, 1.0f));
+	m_MeshInstance[0]->Translation = XMFLOAT3(0.0f, 0.0f, 2.0f);
 
 	m_MeshInstance[1] = new MeshInstance();
 	m_MeshInstance[1]->SetMesh(m_Mesh);
+	m_MeshInstance[1]->SetColor(XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f));
 	m_MeshInstance[1]->Scale = XMFLOAT3(5.0f, 5.0f, 0.5f);
 
 	m_TLAS = new TLAS();
@@ -197,7 +199,7 @@ void Shadows::InitializeSample()
 	m_Camera->Pitch = -30.0f;
 
 	m_DirectionalLight.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	m_DirectionalLight.Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	m_DirectionalLight.Direction = XMFLOAT3(-0.25f, -0.15f, -0.6f);
 	m_DirectionalLight.Intensity = 1.0f;
 }
 
