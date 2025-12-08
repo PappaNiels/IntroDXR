@@ -164,8 +164,8 @@ void MissMainShadow(inout RayPayloadShadow payload)
 [shader("intersection")]
 void IntersectionMain()
 {
-    MyPrimitiveAttributes attr;
-    attr.Color = 1.0f.xxx;
+    
+    // https://raytracing.github.io/books/RayTracingInOneWeekend.html#addingasphere/ray-sphereintersection
     
     float3 oc = 1.5f.xxx - WorldRayOrigin();
     float a = dot(WorldRayDirection(), WorldRayDirection());
@@ -175,6 +175,9 @@ void IntersectionMain()
 
     if (discriminant >= 0.0f)
     {
+        MyPrimitiveAttributes attr;
+        attr.Color = 1.0f.xxx;
+        
         float t = (h - sqrt(discriminant)) / a;
         float3 normal = normalize((WorldRayDirection() * t + WorldRayOrigin()) - 1.5f.xxx);
         
