@@ -26,11 +26,11 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Lighting.cpp">
+    <ClCompile Include="Reflections.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\RaytracingLighting.hlsl" />
+    <FxCompile Include="Shaders\RaytracingReflections.hlsl" />
   </ItemGroup>
 </Project>
