@@ -3,10 +3,11 @@
 
 #include "Device.hpp"
 #include "Mesh.hpp"
+#include "ProceduralPrimitive.hpp"
 
 #include <Renderer/Helper.hpp>
 
-#include <2_Lighting/Shaders/Shared.hpp>
+#include <2_Lighting/Shaders/Shared.hpp> // i hate this...
 
 void TLAS::AddMesh(MeshInstance* mesh)
 {
@@ -15,13 +16,20 @@ void TLAS::AddMesh(MeshInstance* mesh)
 	m_Meshes.push_back(mesh);
 }
 
+void TLAS::AddProceduralPrimitive(ProceduralPrimitiveInstance* primitive)
+{
+	primitive->IsDirty = true; // Ensure that it is labeled as dirty, so we rebuild the tlas
+
+	m_ProceduralPrimitives.push_back(primitive);
+}
+
 void TLAS::Build()
 {
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS buildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS tlasInput = {};
 	tlasInput.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
 	tlasInput.Flags = buildFlags;
-	tlasInput.NumDescs = static_cast<uint32_t>(m_Meshes.size());
+	tlasInput.NumDescs = static_cast<uint32_t>(m_Meshes.size() + m_ProceduralPrimitives.size());
 	tlasInput.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 
 	auto device = Device::GetDevice().GetInternalDevice();
@@ -35,7 +43,7 @@ void TLAS::Build()
 	AllocateUAVBuffer(device.Get(), info.ResultDataMaxSizeInBytes, &m_TLAS, D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE, L"TopLevelAccelerationStructure");
 
 	std::vector<D3D12_RAYTRACING_INSTANCE_DESC> meshes;
-	meshes.reserve(m_Meshes.size());
+	meshes.reserve(m_Meshes.size() + m_ProceduralPrimitives.size());
 
 	for (const auto& mesh : m_Meshes)
 	{
@@ -44,13 +52,42 @@ void TLAS::Build()
 			continue;
 		}
 
-
 		D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
 		instanceDesc.InstanceMask = 1;
 		instanceDesc.AccelerationStructure = mesh->GetBLASAddress();
 		instanceDesc.InstanceID = 0;
 		
 		auto transform = mesh->GetMatrix();
+		auto m = XMMatrixTranspose(transform);
+
+		for (int i = 0; i < 3; ++i)
+		{
+			instanceDesc.Transform[i][0] = DirectX::XMVectorGetX(m.r[i]);
+			instanceDesc.Transform[i][1] = DirectX::XMVectorGetY(m.r[i]);
+			instanceDesc.Transform[i][2] = DirectX::XMVectorGetZ(m.r[i]);
+			instanceDesc.Transform[i][3] = DirectX::XMVectorGetW(m.r[i]);
+		}
+
+		//instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
+
+		meshes.push_back(instanceDesc);
+	}
+
+	for (const auto& primitive : m_ProceduralPrimitives)
+	{
+		if (primitive == nullptr || !primitive)
+		{
+			continue;
+		}
+
+
+		D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
+		instanceDesc.InstanceMask = 1;
+		instanceDesc.AccelerationStructure = primitive->GetBLASAddress();
+		instanceDesc.InstanceID = 0;
+		instanceDesc.InstanceContributionToHitGroupIndex = primitive->m_ProceduralPrimitive->m_HitGroupIdx;
+
+		auto transform = primitive->GetMatrix();
 		auto m = XMMatrixTranspose(transform);
 
 		for (int i = 0; i < 3; ++i)

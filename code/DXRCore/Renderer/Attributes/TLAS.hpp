@@ -11,6 +11,7 @@ public:
 	TLAS() = default;
 
 	void AddMesh(class MeshInstance* mesh);
+	void AddProceduralPrimitive(class ProceduralPrimitiveInstance* primitive);
 	void Build();
 	void Build(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList7> cmdList);
 
@@ -29,5 +30,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_GeometryData;
 
 	std::vector<class MeshInstance*> m_Meshes;
+	std::vector<class ProceduralPrimitiveInstance*> m_ProceduralPrimitives;
 };
 

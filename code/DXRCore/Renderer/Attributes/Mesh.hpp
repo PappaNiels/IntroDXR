@@ -33,6 +33,11 @@ public:
 		return m_BLAS->GetGPUVirtualAddress();
 	}
 
+	void SetFlags(D3D12_RAYTRACING_GEOMETRY_FLAGS flags) 
+	{
+		m_Flags = flags; 
+	}
+
 private:
 	friend class TLAS;
 

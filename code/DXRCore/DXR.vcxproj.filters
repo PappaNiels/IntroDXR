@@ -60,6 +60,9 @@
     <ClCompile Include="Renderer\Attributes\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\Attributes\ProceduralPrimitive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\Assert.hpp">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Attributes\Texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Attributes\ProceduralPrimitive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
