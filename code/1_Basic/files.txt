@@ -1,2 +1,0 @@
-Basic.cpp
-pch.cpp
