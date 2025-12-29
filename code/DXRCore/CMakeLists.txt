@@ -14,7 +14,7 @@ set_target_properties(DXRCore PROPERTIES
 )
 
 set_target_properties(DXRCore PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..
 )
 
 target_include_directories(DXRCore PRIVATE ${CMAKE_SOURCE_DIR}/code)
@@ -51,5 +51,5 @@ find_program(NUGET nuget)
 if (NOT NUGET)
     message(FATAL " Nuget was not found. Installation is needed")
 else()
-    execute_process(COMMAND ${NUGET} restore packages.config -SolutionDir ../)
+    execute_process(COMMAND ${NUGET} restore ${CMAKE_CURRENT_SOURCE_DIR}/packages.config -SolutionDir ${CMAKE_CURRENT_SOURCE_DIR}/../)
 endif() 

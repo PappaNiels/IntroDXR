@@ -51,7 +51,7 @@ set_target_properties(1_Basic PROPERTIES
 target_precompile_headers(1_Basic PRIVATE pch.hpp)
 
 set_target_properties(1_Basic PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..
 )
 
 target_include_directories(1_Basic PUBLIC ${CMAKE_SOURCE_DIR}/code)
