@@ -61,3 +61,35 @@ target_sources(1_Basic PRIVATE
     Basic.cpp
     pch.cpp
 )
+
+add_custom_command(
+    TARGET 1_Basic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/code/packages/Microsoft.Direct3D.D3D12.1.618.2/build/native/bin/x64/D3D12Core.dll"
+        "$<TARGET_FILE_DIR:1_Basic>/D3D12/D3D12Core.dll"
+)
+
+add_custom_command(
+    TARGET 1_Basic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/code/packages/Microsoft.Direct3D.D3D12.1.618.2/build/native/bin/x64/D3D12Core.pdb"
+        "$<TARGET_FILE_DIR:1_Basic>/D3D12/D3D12Core.pdb"
+)
+
+add_custom_command(
+    TARGET 1_Basic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/code/packages/Microsoft.Direct3D.D3D12.1.618.2/build/native/bin/x64/d3d12SDKLayers.dll"
+        "$<TARGET_FILE_DIR:1_Basic>/D3D12/d3d12SDKLayers.dll"
+)
+
+add_custom_command(
+    TARGET 1_Basic
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/code/packages/Microsoft.Direct3D.D3D12.1.618.2/build/native/bin/x64/d3d12SDKLayers.pdb"
+        "$<TARGET_FILE_DIR:1_Basic>/D3D12/d3d12SDKLayers.pdb"
+)

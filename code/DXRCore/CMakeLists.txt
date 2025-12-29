@@ -45,3 +45,11 @@ target_sources(DXRCore PRIVATE
     Utils\\CLI.cpp
     Utils\\Error.cpp
 )
+
+find_program(NUGET nuget)
+
+if (NOT NUGET)
+    message(FATAL " Nuget was not found. Installation is needed")
+else()
+    execute_process(COMMAND ${NUGET} restore packages.config -SolutionDir ../)
+endif() 
