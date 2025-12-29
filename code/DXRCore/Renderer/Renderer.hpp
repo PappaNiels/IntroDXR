@@ -3,7 +3,7 @@
 #include <wrl/client.h>
 #include <dxgi1_6.h>
 
-#define SAMPLE(x) Renderer* CreateSample() { return new x();} std::wstring Renderer::ms_SampleName = L#x;
+#define SAMPLE(x) Renderer* CreateSample() { return new x();} std::string Renderer::ms_SampleName = #x;
 
 class Renderer
 {
@@ -60,6 +60,6 @@ protected:
 	uint32_t m_Width;
 	uint32_t m_Height;
 
-	static std::wstring ms_SampleName;
+	static std::string ms_SampleName;
 };
 

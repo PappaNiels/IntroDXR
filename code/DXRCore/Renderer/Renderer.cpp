@@ -122,24 +122,25 @@ void Renderer::Resize(uint32_t width, uint32_t height)
 
 void Renderer::CreateRenderWindow()
 {
-	std::wstring windowName = L"Intro to DirectX Raytracing | " + ms_SampleName;
+	std::string windowName = "Intro to DirectX Raytracing | " + ms_SampleName;
 
 	if (GetCLI().Validation)
 	{
-		windowName += L" [Validation]";
+		windowName += " [Validation]";
 	}
 
 	if (GetCLI().Warp)
 	{
-		windowName += L" [WARP]";
+		windowName += " [WARP]";
 	}
 
 	WNDCLASSEX wndClass = {};
 	wndClass.cbSize = sizeof(wndClass);
 	wndClass.hInstance = GetModuleHandleW(nullptr);
-	wndClass.lpszClassName = L"RenderWindowClass";
+	wndClass.lpszClassName = "RenderWindowClass";
 	wndClass.style = 0;
 	wndClass.lpfnWndProc = &Renderer::WndProc;
+	wndClass.hCursor = nullptr;
 
 	auto hr = RegisterClassEx(&wndClass);
 	if (FAILED(hr))
@@ -156,11 +157,12 @@ void Renderer::CreateRenderWindow()
 	int32_t width = static_cast<int32_t>(R.right - R.left);
 	int32_t height  = static_cast<int32_t>(R.bottom - R.top);
 
-	m_HWND = CreateWindow(L"RenderWindowClass", windowName.c_str(), WS_OVERLAPPEDWINDOW, (desktop.right / 2) - (width / 2), (desktop.bottom / 2) - (height / 2), width, height, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
+	m_HWND = CreateWindow("RenderWindowClass", windowName.c_str(), WS_OVERLAPPEDWINDOW, (desktop.right / 2) - (width / 2), (desktop.bottom / 2) - (height / 2), width, height, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
 
 	if (m_HWND == nullptr)
 	{
 		FatalError("Failed to create a window");
+		return;
 	}
 
 	ShowWindow(m_HWND, SW_SHOW);
@@ -183,6 +185,7 @@ void Renderer::CreateRenderTarget()
 	if (FAILED(hr))
 	{
 		FatalError("Failed to create render target. HResult: 0x%08X", hr);
+		return;
 	}
 	
 	m_Device->GetInternalDevice()->CreateRenderTargetView(m_RenderTarget.Get(), nullptr, m_RTVHeap->GetCPUHandle(m_RTV));

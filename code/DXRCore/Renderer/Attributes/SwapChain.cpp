@@ -110,12 +110,13 @@ void SwapChain::Present(Microsoft::WRL::ComPtr<ID3D12Resource> renderTarget)
 
 void SwapChain::Resize(uint32_t width, uint32_t height)
 {
+    auto desc = m_BackBuffers[0]->GetDesc();
+
     for (auto& backBuffer : m_BackBuffers)
     {
         backBuffer.Reset();
     }
 
-    auto desc = m_BackBuffers[0]->GetDesc();
 
     if (FAILED(m_SwapChain->ResizeBuffers(ms_BackBufferCount, width, height, desc.Format, desc.Flags)))
     {

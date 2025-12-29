@@ -420,3 +420,6 @@ FodyWeavers.xsd
 # Shader output
 *_Release.hpp
 *_Debug.hpp
+
+build/
+projects/
