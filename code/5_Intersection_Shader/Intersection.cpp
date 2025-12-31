@@ -41,9 +41,11 @@ private:
 	TLAS* m_TLAS = nullptr;
 	Mesh* m_Mesh = nullptr;
 	ProceduralPrimitive* m_ProceduralPrimitive = nullptr;
+	ProceduralPrimitive* m_ProceduralPrimitiveTorus = nullptr;
 
 	MeshInstance* m_MeshInstance[2] = { nullptr, nullptr };
 	ProceduralPrimitiveInstance* m_ProceduralPrimitiveInstance = nullptr;
+	ProceduralPrimitiveInstance* m_ProceduralPrimitiveInstanceTorus = nullptr;
 
 	Texture* m_SkyDome = nullptr;
 
@@ -183,19 +185,39 @@ void Intersection::InitializeSample()
 	m_ProceduralPrimitive->SetHitGroupIndex(1);
 	m_ProceduralPrimitive->BuildBLAS();
 
+	m_ProceduralPrimitiveTorus = new ProceduralPrimitive();
+
+	aabb = {};
+	aabb.MinX = 2.0f;
+	aabb.MinY = 2.0f;
+	aabb.MinZ = 2.0f;
+
+	aabb.MaxX = 3.0f;
+	aabb.MaxY = 3.0f;
+	aabb.MaxZ = 3.0f;
+
+	m_ProceduralPrimitiveTorus->AddEntry({ aabb, {} });
+	m_ProceduralPrimitiveTorus->SetHitGroupIndex(2);
+	m_ProceduralPrimitiveTorus->BuildBLAS();
+
 	m_ProceduralPrimitiveInstance = new ProceduralPrimitiveInstance();
 	m_ProceduralPrimitiveInstance->SetMesh(m_ProceduralPrimitive);
+	
+	m_ProceduralPrimitiveInstanceTorus = new ProceduralPrimitiveInstance();
+	m_ProceduralPrimitiveInstanceTorus->SetMesh(m_ProceduralPrimitiveTorus);
 
 	m_TLAS = new TLAS();
 	m_TLAS->AddMesh(m_MeshInstance[0]);
 	m_TLAS->AddMesh(m_MeshInstance[1]);
 	m_TLAS->AddProceduralPrimitive(m_ProceduralPrimitiveInstance);
+	m_TLAS->AddProceduralPrimitive(m_ProceduralPrimitiveInstanceTorus);
 	m_TLAS->Build();
 
 	RaytracingPipelineDesc desc = {};
 	desc.RayGenEntry.EntryName = L"RayGenMain";
 	desc.HitGroups.emplace_back(L"ClosestMain", L"", L"", L"HitGroup", D3D12_HIT_GROUP_TYPE_TRIANGLES);
-	desc.HitGroups.emplace_back(L"ClosestMainPrimitive", L"", L"IntersectionMain", L"HitGroupPrimitive", D3D12_HIT_GROUP_TYPE_PROCEDURAL_PRIMITIVE);
+	desc.HitGroups.emplace_back(L"ClosestMainPrimitive", L"", L"IntersectionMainSphere", L"HitGroupPrimitive", D3D12_HIT_GROUP_TYPE_PROCEDURAL_PRIMITIVE);
+	desc.HitGroups.emplace_back(L"ClosestMainPrimitive", L"", L"IntersectionMainTorus", L"HitGroupPrimitiveTorus", D3D12_HIT_GROUP_TYPE_PROCEDURAL_PRIMITIVE);
 	desc.MissShaders.emplace_back(L"MissMain");
 	desc.MissShaders.emplace_back(L"MissMainShadow");
 	desc.ShaderCode.pShaderBytecode = g_RaytracingIntersection;
@@ -207,7 +229,7 @@ void Intersection::InitializeSample()
 	desc.PayloadSize = sizeof(float) * 4 + sizeof(uint);
 
 	CD3DX12_ROOT_PARAMETER params[Count] = {};
-	params[Core].InitAsConstants(21, 0);
+	params[Core].InitAsConstants(53, 0);
 	params[Light].InitAsConstants(sizeof(hlsl::DirectionalLight) / sizeof(uint32_t), 1);
 	params[GeometryData].InitAsShaderResourceView(0);
 	params[BVH].InitAsShaderResourceView(1);
@@ -243,9 +265,17 @@ void Intersection::RenderSample(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList
 	cmdList->SetComputeRootSignature(m_Pipeline->GetRootSignature().Get());
 
 	cmdList->SetComputeRoot32BitConstants(Core, 16, &m_Camera->InverseViewProjection, 0);
-	cmdList->SetComputeRoot32BitConstants(Core, 3, &m_Camera->Position, 16);
-	cmdList->SetComputeRoot32BitConstant(Core, m_UAV, 19);
-	cmdList->SetComputeRoot32BitConstant(Core, m_SkyDome->GetSRV(), 20);
+
+	auto transform = XMMatrixTranslation(2.5f, 2.5f, 2.5f);
+	auto transformInverse = XMMatrixInverse(nullptr, transform);
+
+	cmdList->SetComputeRoot32BitConstants(Core, 16, &transform, 16);
+	cmdList->SetComputeRoot32BitConstants(Core, 16, &transformInverse, 32);
+
+	cmdList->SetComputeRoot32BitConstants(Core, 3, &m_Camera->Position, 48);
+
+	cmdList->SetComputeRoot32BitConstant(Core, m_UAV, 51);
+	cmdList->SetComputeRoot32BitConstant(Core, m_SkyDome->GetSRV(), 52);
 
 	cmdList->SetComputeRoot32BitConstants(Light, sizeof(hlsl::DirectionalLight) / sizeof(uint32_t), &m_DirectionalLight, 0);
 

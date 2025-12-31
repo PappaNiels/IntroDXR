@@ -24,6 +24,8 @@ RaytracingAccelerationStructure g_Scene : register(t1);
 cbuffer Core : register(b0)
 {
     float4x4 g_InverseViewProjection;
+    float4x4 g_Transform;
+    float4x4 g_TransformInverse;
     float3 g_CameraPosition;
     uint g_UAV;
     uint g_SkySRV;
@@ -127,7 +129,7 @@ void ClosestMain(inout RayPayload payload, in MyAttributes attr)
     }
     
     
-    radiance = mesh.Color.rgb * radiance * 0.65f + radiancePayload.Color.rgb ;
+    radiance = mesh.Color.rgb * radiance * 0.65f + radiancePayload.Color.rgb;
     
     payload.Color = float4(radiance * shadowValue + mesh.Color.rgb * 0.35f, 1.0f);
 }
@@ -162,9 +164,8 @@ void MissMainShadow(inout RayPayloadShadow payload)
 }
 
 [shader("intersection")]
-void IntersectionMain()
+void IntersectionMainSphere()
 {
-    
     // https://raytracing.github.io/books/RayTracingInOneWeekend.html#addingasphere/ray-sphereintersection
     
     float3 oc = 1.5f.xxx - WorldRayOrigin();
@@ -182,6 +183,105 @@ void IntersectionMain()
         float3 normal = normalize((WorldRayDirection() * t + WorldRayOrigin()) - 1.5f.xxx);
         
         attr.Color = mad(normal, 0.5, 0.5);
+        
+        ReportHit(t, 0, attr);
+    }
+}
+
+[shader("intersection")]
+void IntersectionMainTorus()
+{
+    float3 ro = mul(g_TransformInverse, float4(ObjectRayOrigin(), 1.0f)).xyz;
+    float3 rd = mul(g_TransformInverse, float4(ObjectRayDirection(), 0.0f)).xyz;
+    
+    float2 tor = float2(0.3f, 0.1f);
+    
+    float po = 1.0;
+    float Ra2 = tor.x * tor.x;
+    float ra2 = tor.y * tor.y;
+    float m = dot(ro, ro);
+    float n = dot(ro, rd);
+    float k = (m + Ra2 - ra2) / 2.0;
+    float k3 = n;
+    float k2 = n * n - Ra2 * dot(rd.xy, rd.xy) + k;
+    float k1 = n * k - Ra2 * dot(rd.xy, ro.xy);
+    float k0 = k * k - Ra2 * dot(ro.xy, ro.xy);
+    
+    if (abs(k3 * (k3 * k3 - k2) + k1) < 0.01)
+    {
+        po = -1.0;
+        float tmp = k1;
+        k1 = k3;
+        k3 = tmp;
+        k0 = 1.0 / k0;
+        k1 = k1 * k0;
+        k2 = k2 * k0;
+        k3 = k3 * k0;
+    }
+    
+    float c2 = k2 * 2.0 - 3.0 * k3 * k3;
+    float c1 = k3 * (k3 * k3 - k2) + k1;
+    float c0 = k3 * (k3 * (c2 + 2.0 * k2) - 8.0 * k1) + 4.0 * k0;
+    c2 /= 3.0;
+    c1 *= 2.0;
+    c0 /= 3.0;
+    float Q = c2 * c2 + c0;
+    float R = c2 * c2 * c2 - 3.0 * c2 * c0 + c1 * c1;
+    float h = R * R - Q * Q * Q;
+    
+    if (h >= 0.0)
+    {
+        MyPrimitiveAttributes attr;
+        attr.Color = 1.0f.xxx;
+        
+        h = sqrt(h);
+        float v = sign(R + h) * pow(abs(R + h), 1.0 / 3.0); // cube root
+        float u = sign(R - h) * pow(abs(R - h), 1.0 / 3.0); // cube root
+        float2 s = float2((v + u) + 4.0 * c2, (v - u) * sqrt(3.0));
+        float y = sqrt(0.5 * (length(s) + s.x));
+        float x = 0.5 * s.y / y;
+        float r = 2.0 * c1 / (x * x + y * y);
+        float t1 = x - r - k3;
+        t1 = (po < 0.0) ? 2.0 / t1 : t1;
+        float t2 = -x - r - k3;
+        t2 = (po < 0.0) ? 2.0 / t2 : t2;
+        float t = 1e20;
+        if (t1 > 0.0)
+            t = t1;
+        if (t2 > 0.0)
+            t = min(t, t2);
+        
+        ReportHit(t, 0, attr);
+    }
+    
+    float sQ = sqrt(Q);
+    float w = sQ * cos(acos(-R / (sQ * Q)) / 3.0);
+    float d2 = -(w + c2);
+    if (d2 > 0.0)
+    {
+        MyPrimitiveAttributes attr;
+        attr.Color = 1.0f.xxx;
+        
+        float d1 = sqrt(d2);
+        float h1 = sqrt(w - 2.0 * c2 + c1 / d1);
+        float h2 = sqrt(w - 2.0 * c2 - c1 / d1);
+        float t1 = -d1 - h1 - k3;
+        t1 = (po < 0.0) ? 2.0 / t1 : t1;
+        float t2 = -d1 + h1 - k3;
+        t2 = (po < 0.0) ? 2.0 / t2 : t2;
+        float t3 = d1 - h2 - k3;
+        t3 = (po < 0.0) ? 2.0 / t3 : t3;
+        float t4 = d1 + h2 - k3;
+        t4 = (po < 0.0) ? 2.0 / t4 : t4;
+        float t = 1e20;
+        if (t1 > 0.0)
+            t = t1;
+        if (t2 > 0.0)
+            t = min(t, t2);
+        if (t3 > 0.0)
+            t = min(t, t3);
+        if (t4 > 0.0)
+            t = min(t, t4);
         
         ReportHit(t, 0, attr);
     }
