@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "5_Intersection_Shader", "5_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "4_Reflections", "4_Raytraced_Reflections\Reflections.vcxproj", "{14766040-E11D-4422-84D0-6AD376765A73}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "6_Hello_Compute", "6_Compute_Shader\HelloCompute.vcxproj", "{064A40F9-4253-4F78-ACEB-8A4F0A9AF0F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win64 = Debug|Win64
@@ -53,6 +55,10 @@ Global
 		{14766040-E11D-4422-84D0-6AD376765A73}.Debug|Win64.Build.0 = Debug|x64
 		{14766040-E11D-4422-84D0-6AD376765A73}.Release|Win64.ActiveCfg = Release|x64
 		{14766040-E11D-4422-84D0-6AD376765A73}.Release|Win64.Build.0 = Release|x64
+		{064A40F9-4253-4F78-ACEB-8A4F0A9AF0F6}.Debug|Win64.ActiveCfg = Debug|x64
+		{064A40F9-4253-4F78-ACEB-8A4F0A9AF0F6}.Debug|Win64.Build.0 = Debug|x64
+		{064A40F9-4253-4F78-ACEB-8A4F0A9AF0F6}.Release|Win64.ActiveCfg = Release|x64
+		{064A40F9-4253-4F78-ACEB-8A4F0A9AF0F6}.Release|Win64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -63,6 +69,7 @@ Global
 		{490D2C70-C9B3-4257-A7F4-F094306EE429} = {5AFEB4E4-CAB8-4BF0-9C7A-60F0F2F4A240}
 		{F387BC85-3258-4B4D-9614-D8CDA6999E44} = {5AFEB4E4-CAB8-4BF0-9C7A-60F0F2F4A240}
 		{14766040-E11D-4422-84D0-6AD376765A73} = {5AFEB4E4-CAB8-4BF0-9C7A-60F0F2F4A240}
+		{064A40F9-4253-4F78-ACEB-8A4F0A9AF0F6} = {5AFEB4E4-CAB8-4BF0-9C7A-60F0F2F4A240}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1CC91A96-A386-48B0-B700-DD6216CF1B22}

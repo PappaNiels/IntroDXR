@@ -63,6 +63,9 @@
     <ClCompile Include="Renderer\Attributes\ProceduralPrimitive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\Attributes\ComputePipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\Assert.hpp">
@@ -108,6 +111,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Attributes\ProceduralPrimitive.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Attributes\ComputePipeline.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

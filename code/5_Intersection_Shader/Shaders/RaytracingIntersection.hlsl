@@ -39,7 +39,7 @@ static const float INVPI = 0.31830988618379067153777f;
 static const float INV2PI = 0.15915494309189533576888f;
 static const float PI = 3.14159265;
 
-RayDesc GetPrimaryRay(uint2 index)
+inline RayDesc GetPrimaryRay(uint2 index)
 {
     RayDesc ray;
     ray.Origin = g_CameraPosition;

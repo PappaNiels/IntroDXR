@@ -113,6 +113,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Renderer\Attributes\ComputePipeline.cpp" />
     <ClCompile Include="Renderer\Attributes\ProceduralPrimitive.cpp" />
     <ClCompile Include="Renderer\Attributes\Mesh.cpp" />
     <ClCompile Include="Renderer\Attributes\TLAS.cpp" />
@@ -134,6 +135,7 @@
     <ClCompile Include="Utils\Error.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Renderer\Attributes\ComputePipeline.hpp" />
     <ClInclude Include="Renderer\Attributes\ProceduralPrimitive.hpp" />
     <ClInclude Include="Renderer\Attributes\Mesh.hpp" />
     <ClInclude Include="Renderer\Attributes\TLAS.hpp" />

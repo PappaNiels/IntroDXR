@@ -122,22 +122,22 @@ void Renderer::Resize(uint32_t width, uint32_t height)
 
 void Renderer::CreateRenderWindow()
 {
-	std::string windowName = "Intro to DirectX Raytracing | " + ms_SampleName;
+	std::wstring windowName = L"Intro to DirectX Raytracing | " + ms_SampleName;
 
 	if (GetCLI().Validation)
 	{
-		windowName += " [Validation]";
+		windowName += L" [Validation]";
 	}
 
 	if (GetCLI().Warp)
 	{
-		windowName += " [WARP]";
+		windowName += L" [WARP]";
 	}
 
 	WNDCLASSEX wndClass = {};
 	wndClass.cbSize = sizeof(wndClass);
 	wndClass.hInstance = GetModuleHandleW(nullptr);
-	wndClass.lpszClassName = "RenderWindowClass";
+	wndClass.lpszClassName = L"RenderWindowClass";
 	wndClass.style = 0;
 	wndClass.lpfnWndProc = &Renderer::WndProc;
 	wndClass.hCursor = nullptr;
@@ -157,7 +157,7 @@ void Renderer::CreateRenderWindow()
 	int32_t width = static_cast<int32_t>(R.right - R.left);
 	int32_t height  = static_cast<int32_t>(R.bottom - R.top);
 
-	m_HWND = CreateWindow("RenderWindowClass", windowName.c_str(), WS_OVERLAPPEDWINDOW, (desktop.right / 2) - (width / 2), (desktop.bottom / 2) - (height / 2), width, height, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
+	m_HWND = CreateWindow(L"RenderWindowClass", windowName.c_str(), WS_OVERLAPPEDWINDOW, (desktop.right / 2) - (width / 2), (desktop.bottom / 2) - (height / 2), width, height, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
 
 	if (m_HWND == nullptr)
 	{
